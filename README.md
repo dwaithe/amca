@@ -21,6 +21,6 @@ Python scripts are written in python 3.5.
 
 ### Augmented Reality Microscope schematic and instructions
 For this project we developed an attachment to our Olympus IX73 microscope which meant it could be used for Augmented Reality.
-![](augmented_reality_microscopy/gif_augmented_reality.gif)
+![](augmented_reality_microscope/gif_augmented_reality.gif)
 
 
