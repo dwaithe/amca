@@ -1,9 +1,9 @@
-from stageXY_control import*
-import zpiezoPI as zpi
+from control.stageXY_control import*
+import control.zpiezoPI as zpi
 
+from control.define_micro_path import*
 from ctypes import cdll
 import numpy
-from define_micro_path import*
 import cv2
 import time
 from msvcrt import getch

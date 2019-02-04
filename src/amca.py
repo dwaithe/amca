@@ -22,6 +22,9 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
+import sys 
+sys.path.append("C:/Users/immuser/Documents/micro_vision/Faster-RCNN-TensorFlow-Python3.5-master/")
+sys.path.append("C:/Users/immuser/Documents/micro_vision/ijpython_roi")
 from lib.config import config as cfg
 from lib.utils.nms_wrapper import nms
 from lib.utils.test import im_detect
@@ -32,8 +35,8 @@ import time as time
 import matplotlib.pyplot as plt
 import numpy as np
 import time
-from stageXY_control import*
-import zpiezoPI as zpi
+from control.stageXY_control import*
+import control.zpiezoPI as zpi
 import tifffile
 import sys
 sys.path.append('ijpython_roi')
@@ -255,7 +258,7 @@ d.t1 = time.time()
 
 
 
-def demo(arr):
+def analyzeAndMove(arr):
 	"""Detect object classes in an image using pre-computed object proposals."""
 
 	
@@ -397,7 +400,7 @@ def demo(arr):
 							data.append(encode_ij_roi(roi_b))
 
 					metadata = {'hyperstack': True ,'ImageJ': '1.52g', 'Overlays':data , 'loop': False}
-					tifffile.imsave("out/img_stk_x_"+str(d.stage_pos_x)+"y_"+str(d.stage_pos_y)+".tif",np_stk,shape=np_stk.shape,imagej=True,ijmetadata=metadata)
+					tifffile.imsave("C:/Users/immuser/Documents/micro_vision/out/img_stk_x_"+str(d.stage_pos_x)+"y_"+str(d.stage_pos_y)+".tif",np_stk,shape=np_stk.shape,imagej=True,ijmetadata=metadata)
 					d.img_stk = {}
 					d.regions = {}
 				
@@ -453,7 +456,7 @@ args = parse_args()
 # model path
 demonet = 'C127'
 dataset = args.dataset
-tfmodel = os.path.join('output', demonet, DATASETS[dataset][0], 'default', NETS[demonet][0])
+tfmodel = os.path.join('C:/Users/immuser/Documents/micro_vision/Faster-RCNN-TensorFlow-Python3.5-master/output', demonet, DATASETS[dataset][0], 'default', NETS[demonet][0])
 
 if not os.path.isfile(tfmodel + '.meta'):
 				print(tfmodel)
