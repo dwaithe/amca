@@ -1,8 +1,8 @@
 # amca
 This is a repository for the Automated Microscopy Control Environment.
 
-There is a journal paper associated with the development of this package. This can be found here:
-coming soon.
+There is a biorxiv paper associated with the development of this package. This can be found here:
+https://www.biorxiv.org/content/10.1101/544833v1
 
 
 ### Requirements
