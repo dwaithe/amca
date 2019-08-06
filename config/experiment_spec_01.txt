@@ -1,0 +1,9 @@
+
+
+
+
+darknet_model_init="darknet19_448.conv.23"
+train_on_dataset="dataset01"
+test_on_dataset="mixed01"
+
+
