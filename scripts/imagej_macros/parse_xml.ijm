@@ -16,13 +16,13 @@
 //for(i=61678;i<61679;i++){
 //info_path = "/Users/dwaithe/Documents/collaborators/WaitheD/micro_vision/Faster-RCNN-TensorFlow-Python3.5/data/eukaryote_dapi_class/2018/Annotations/0"+i+".xml";
 //img_dir = "/Users/dwaithe/Documents/collaborators/WaitheD/micro_vision/Faster-RCNN-TensorFlow-Python3.5/data/eukaryote_dapi_class/2018/JPEGImages/";
-for(i=10045;i<10046;i++){
-info_path = "/Users/dwaithe/Documents/collaborators/WaitheD/micro_vision/Faster-RCNN-TensorFlow-Python3.5/data/fibroblast_nucleopore_class/2018/Annotations/0"+i+".xml";
-img_dir   = "/Users/dwaithe/Documents/collaborators/WaitheD/micro_vision/Faster-RCNN-TensorFlow-Python3.5/data/fibroblast_nucleopore_class/2018/JPEGImages/";
+//for(i=10045;i<10046;i++){
+//info_path = "/Users/dwaithe/Documents/collaborators/WaitheD/micro_vision/Faster-RCNN-TensorFlow-Python3.5/data/fibroblast_nucleopore_class/2018/Annotations/0"+i+".xml";
+//img_dir   = "/Users/dwaithe/Documents/collaborators/WaitheD/micro_vision/Faster-RCNN-TensorFlow-Python3.5/data/fibroblast_nucleopore_class/2018/JPEGImages/";
 //print(info_path);
-//for(i=107610;i<107611;i++){
-//info_path ="/Users/dwaithe/Documents/collaborators/WaitheD/micro_vision/Faster-RCNN-TensorFlow-Python3.5/data/hela_peroxisome_all_class/2018/Annotations/"+i+".xml";
-//img_dir = "/Users/dwaithe/Documents/collaborators/WaitheD/micro_vision/Faster-RCNN-TensorFlow-Python3.5/data/hela_peroxisome_all_class/2018/JPEGImages/";
+for(i=107614;i<107615;i++){
+info_path ="/Users/dwaithe/Documents/collaborators/WaitheD/micro_vision/Faster-RCNN-TensorFlow-Python3.5/data/hek_peroxisome_class/2018/Annotations/"+i+".xml";
+img_dir = "/Users/dwaithe/Documents/collaborators/WaitheD/micro_vision/Faster-RCNN-TensorFlow-Python3.5/data/hek_peroxisome_class/2018/JPEGImages/";
 info_string = File.openAsString(info_path);
 roiManager("Reset");
 //run("Close All");

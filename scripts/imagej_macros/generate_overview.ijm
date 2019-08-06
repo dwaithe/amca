@@ -94,8 +94,35 @@ for (k=0; k<xCoords.length; k++) {
 	print(filepath);
 	//exit();
 	open(filepath);	
-	filepath = srcdir+"img_stk_x_"+xCoords_val[k]+"y_"+yCoords_val[k]+"_"++".tif";
-	save(filepath);
+	ex = getTitle();
+	 
+	a = exec("stat", "-f%m", filepath);
+	print(ex,'\t',nSlices,'\t',a);
+	
+	
+	run("Z Project...", "projection=[Max Intensity]");
+	run("Remove Overlay");
+	//run("Flatten");
+	run("Flip Horizontally");
+	//run("Flip Vertically");
+	run("Select All");
+	run("Specify...", "width="+(img_size)+" height="+(img_size)+" x=0 y=0");
+	run("Copy");
+	
+	selectWindow("out");
+	setPasteMode("Add");
+	
+	//print("minX",minX,"minY",minY);
+	xco = ((xCoords[k]-minX)/pxsz);
+	yco = ((yCoords[k]-minY)/pxsz);
+	//print(xco,yco);
+	run("Specify...", "width="+(img_size)+" height="+(img_size)+" x="+xco+" y="+yco+"");
+	run("Paste");
+	//setForegroundColor(255,255,255);
+	//run("Draw");
+	close("img_stk_x_"+xCoords_val[k]+"y_"+yCoords_val[k]+".tif");
+	close("MAX_img_stk_x_"+xCoords_val[k]+"y_"+yCoords_val[k]+".tif");
+	close("MAX_img_stk_x_"+xCoords_val[k]+"y_"+yCoords_val[k]+"-1.tif");
 	//exit();
 }
 run("Select All");

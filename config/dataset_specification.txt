@@ -1,0 +1,111 @@
+#Dataset specification file:
+
+#neuroblastoma phalloidin class, full data:
+dataset=0
+dir="neuroblastoma_phal_class/2018/"
+training_images=180
+testing_images=180
+cell_class="cell - neuroblastoma phalloidin dapi"
+
+#neuroblastoma phalloidin class, 25 training images:
+dataset=1
+dir="neuroblastoma_phal_class/2018/"
+training_images=25
+testing_images=180
+cell_class="cell - neuroblastoma phalloidin dapi"
+
+#neuroblastoma phalloidin class, 50 training images:
+dataset=2
+dir="neuroblastoma_phal_class/2018/"
+training_images=50
+testing_images=180
+cell_class="cell - neuroblastoma phalloidin dapi"
+
+#neuroblastoma phalloidin class, 75 training images:
+dataset=3
+dir="neuroblastoma_phal_class/2018/"
+training_images=75
+testing_images=180
+cell_class="cell - neuroblastoma phalloidin dapi"
+
+#neuroblastoma phalloidin class, 100 training images:
+dataset=4
+dir="neuroblastoma_phal_class/2018/"
+training_images=100
+testing_images=180
+cell_class="cell - neuroblastoma phalloidin dapi"
+
+#neuroblastoma phalloidin class, 125 training images:
+dataset=5
+dir="neuroblastoma_phal_class/2018/"
+training_images=125
+testing_images=180
+cell_class="cell - neuroblastoma phalloidin dapi"
+
+#neuroblastoma phalloidin class, 150 training images:
+dataset=6
+dir="neuroblastoma_phal_class/2018/"
+training_images=150
+testing_images=180
+cell_class="cell - neuroblastoma phalloidin dapi"
+
+#neuroblastoma phalloidin class, 180 training images:
+dataset=7
+dir="neuroblastoma_phal_class/2018/"
+training_images=180
+testing_images=180
+cell_class="cell - neuroblastoma phalloidin dapi"
+
+#Erythroblast dapi class, full_data:
+dataset=8
+dir="erythroblast_dapi_class/2018/"
+training_images=80
+testing_images=80
+cell_class="cell - erythroblast dapi"
+
+#Erythroblast dapi glycophorinA, full data:
+dataset=9
+dir="erythroblast_dapi_glycophorinA_class/2018/"
+training_images=80
+testing_images=80
+cell_class="cell - erythroblast dapi glycophorinA"
+
+#C127 dapi class, full data:
+dataset=10
+dir="c127_dapi_class/2018/"
+training_images=30
+testing_images=30
+cell_class="cell - c127 dapi"
+
+#Eukaryote dapi class, full data:
+dataset=11
+dir="eukaryote_dapi_class/2018/"
+training_images=40
+testing_images=40
+cell_class="cell - eukaryote dapi"
+
+#Fibroblast nucleopore class, full data:
+dataset=12
+dir="fibroblast_nucleopore_class/2018/"
+training_images=26
+testing_images=20
+cell_class="cell - fibroblast nucleopore"
+
+#Hek peroxisome class, full data, but only the punctuate cells:
+dataset=13
+dir="hek_peroxisome_class/2018/"
+training_images=55
+testing_images=55
+cell_class="cell - hek peroxisome"
+
+#Hek peroxisome class, full data, but only the punctuate cells:
+dataset=14
+dir="hek_peroxisome_all_class/2018/"
+training_images=55
+testing_images=55
+cell_class="cell - hek peroxisome all"
+
+
+
+
+
