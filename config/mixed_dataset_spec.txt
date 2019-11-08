@@ -1,5 +1,4 @@
 #Mixed dataset specification file:
-path_on_server = '/home/molimm2/dwaithe/keras_experiments/Faster-RCNN-TensorFlow-Python3.5/data/'
 
 #The main mixed dataset used for the paper.
 mixed_dataset=0
@@ -33,16 +32,3 @@ dn_training_set_name="train_dn_n"
 dn_testing_set_name="test_dn_n"
 rn_training_set_name="train_rn_n"
 rn_testing_set_name="test_rn_n"
-
-#The main mixed dataset used for the paper.
-mixed_dataset=3
-dir="mixed/2018/"
-type='homo'
-indices_to_use="0,8,10,11,12,14"
-dn_mixed_class_name="obj_mixed_class"
-dn_training_set_name="train_dn_n"
-dn_testing_set_name="test_dn_n"
-rn_training_set_name="train_rn_n"
-rn_testing_set_name="test_rn_n"
-
-
