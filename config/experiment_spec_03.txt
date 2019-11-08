@@ -1,0 +1,46 @@
+### This is our experiment definition file.
+### It is parsed by quite a simple algorithm #'s are allowed, but please keep to double quotations and no spaces
+### between variable names and equal signs. 
+### It can be parsed by run_bulk_exp.py tuned for darknet, Faster-RCNN and YOLOv2v3
+### If not training, keep "train_on_dataset= " blank.""
+
+### This experiment tests the power of a pre-trained model, when tested on a specific dataset.
+
+out_file_log="mixed_dataset"
+
+
+darknet_model_init="/home/molimm2/dwaithe/keras_experiments/darknet2/darknet19_448.conv.23"
+train_on_dataset="mixed03"
+flip_on=True
+test_on_dataset="dataset06"
+number_of_repetitions=3
+
+darknet_model_init="/home/molimm2/dwaithe/keras_experiments/darknet2/darknet19_448.conv.23"
+train_on_dataset="mixed04"
+flip_on=True
+test_on_dataset="dataset08"
+number_of_repetitions=3
+
+darknet_model_init="/home/molimm2/dwaithe/keras_experiments/darknet2/darknet19_448.conv.23"
+train_on_dataset="mixed05"
+flip_on=True
+test_on_dataset="dataset10"
+number_of_repetitions=3
+
+darknet_model_init="/home/molimm2/dwaithe/keras_experiments/darknet2/darknet19_448.conv.23"
+train_on_dataset="mixed06"
+flip_on=True
+test_on_dataset="dataset11"
+number_of_repetitions=3
+
+darknet_model_init="/home/molimm2/dwaithe/keras_experiments/darknet2/darknet19_448.conv.23"
+train_on_dataset="mixed07"
+flip_on=True
+test_on_dataset="dataset12"
+number_of_repetitions=3
+
+darknet_model_init="/home/molimm2/dwaithe/keras_experiments/darknet2/darknet19_448.conv.23"
+train_on_dataset="mixed08"
+flip_on=True
+test_on_dataset="dataset14"
+number_of_repetitions=3

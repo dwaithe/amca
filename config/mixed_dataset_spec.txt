@@ -1,21 +1,32 @@
 #Mixed dataset specification file:
 path_on_server = '/home/molimm2/dwaithe/keras_experiments/Faster-RCNN-TensorFlow-Python3.5/data/'
 
-
 #The main mixed dataset used for the paper.
 mixed_dataset=0
-dir="mixed/2018/"
-indices_to_use="6,8,10,11,12,14"
+dir="mixed_hetero/2018/"
+type='hetero'
+indices_to_use="0,8,10,11,12,14"
 dn_mixed_class_name="obj_mixed_class"
 dn_training_set_name="train_dn_n"
 dn_testing_set_name="test_dn_n"
 rn_training_set_name="train_rn_n"
 rn_testing_set_name="test_rn_n"
 
+#The main mixed dataset used for the paper.
+mixed_dataset=1
+dir="mixed_homo/2018/"
+type='homo'
+indices_to_use="0,8,10,11,12,14"
+dn_mixed_class_name="obj_mixed_class"
+dn_training_set_name="train_dn_n"
+dn_testing_set_name="test_dn_n"
+rn_training_set_name="train_rn_n"
+rn_testing_set_name="test_rn_n"
 
 #The mixed dataset with two colour samples for the paper.
-mixed_dataset=1
+mixed_dataset=2
 dir="mixed_col/2018/"
+type='homo'
 indices_to_use="7,9"
 dn_mixed_class_name="obj_mixed_class"
 dn_training_set_name="train_dn_n"
@@ -23,13 +34,15 @@ dn_testing_set_name="test_dn_n"
 rn_training_set_name="train_rn_n"
 rn_testing_set_name="test_rn_n"
 
+#The main mixed dataset used for the paper.
+mixed_dataset=3
+dir="mixed/2018/"
+type='homo'
+indices_to_use="0,8,10,11,12,14"
+dn_mixed_class_name="obj_mixed_class"
+dn_training_set_name="train_dn_n"
+dn_testing_set_name="test_dn_n"
+rn_training_set_name="train_rn_n"
+rn_testing_set_name="test_rn_n"
 
-#The dataset comparing the hek peroxisome full annotation versus selective.
-mixed_dataset=2
-dir="mixed_hek_comp/2018/"
-indices_to_use="13,14"
-dn_mixed_class_name="obj_mixed_hek_comp_class"
-dn_training_set_name="train_hek_comp_dn_n"
-dn_testing_set_name="test_hek_comp_dn_n"
-rn_training_set_name="train_hek_comp_rn_n"
-rn_testing_set_name="test_hek_comp_rn_n"
+

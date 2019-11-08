@@ -1,0 +1,13 @@
+### This is our experiment definition file.
+### It is parsed by quite a simple algorithm #'s are allowed, but please keep to double quotations and no spaces
+### between variable names and equal signs.
+### It can be parsed by run_bulk_exp.py tuned for darknet, Faster-RCNN and YOLOv2v3
+### If not training, keep "train_on_dataset= " blank."" 
+
+out_file_log="mixed_dataset"
+
+darknet_model_init="/home/molimm2/dwaithe/keras_experiments/darknet2/darknet19_448.conv.23"
+train_on_dataset="dataset13"
+flip_on=True
+test_on_dataset="dataset13"
+number_of_repetitions=3
