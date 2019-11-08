@@ -467,12 +467,12 @@ def create_YOLO_mixed_hetero_class(params, datasets,datasets_size,datasets_class
             data1 = open(path_in+"train_n"+str(int(dataset_size[0]))+".txt","r")
             data2 = open(path_in+"test_n"+str(int(dataset_size[1]))+".txt","r")
 
-            for data in [data1,data2]:
+            for data,f in zip([data1,data2],[f1,f2]):
                 while 1:
                     line = data.readline()
                     if not line:
                         break
-                    f1.write(path_on_server+global_path+"JPEGImages/"+line[:-1]+'.jpg\n')
+                    f.write(path_on_server+global_path+"JPEGImages/"+line[:-1]+'.jpg\n')
                                         
                     src = path_dir+ "labels/"+line[:-1]+'.txt'
                     dst = path+global_path+"labels/"+line[:-1]+'.txt'
