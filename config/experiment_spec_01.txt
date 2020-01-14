@@ -4,15 +4,51 @@
 ### It can be parsed by run_bulk_exp.py tuned for darknet, Faster-RCNN and YOLOv2v3
 ### If not training, keep "train_on_dataset= " blank."
 
-out_file_log="mixed_dataset"
+out_file_log="dk3AB_yolov3_test"
 
-start #The original six class comparison.
+start #The original six class comparison with homo classes.
+faster_rcnn_model_init=""
+darknet2_model_init="/home/molimm2/dwaithe/object_detection/darknet2/darknet/darknet19_448.conv.23"
+darknet3_model_init="/home/molimm2/dwaithe/object_detection/darknet3/darknet/darknet53.conv.74"
+retinanet_model_init=""
+train_on_dataset="mixed01"
+classes=1 #This is important, we train on mixed dataset but effectively train just one class.
+flip_on=True
+test_on_dataset="dataset0,dataset8,dataset10,dataset11,dataset12,dataset14"
+number_of_repetitions=3
+
+
+start #The original six class comparison with hetero classes.
 faster_rcnn_model_init=""
 darknet2_model_init="/home/molimm2/dwaithe/object_detection/darknet2/darknet/darknet19_448.conv.23"
 darknet3_model_init="/home/molimm2/dwaithe/object_detection/darknet3/darknet/darknet53.conv.74"
 retinanet_model_init=""
 train_on_dataset="mixed00"
-classes=1 #This is important, we train on mixed dataset but effectively train just one class.
+classes=6 #This is important, we train on mixed dataset.
 flip_on=True
-test_on_dataset="dataset00,dataset08,dataset10,dataset11,dataset12,dataset14"
+test_on_dataset="mixed00"
 number_of_repetitions=3
+
+start #The original six class comparison with homo classes.
+faster_rcnn_model_init=""
+darknet2_model_init="/home/molimm2/dwaithe/object_detection/darknet2/darknet/darknet19_448.conv.23"
+darknet3_model_init="/home/molimm2/dwaithe/object_detection/darknet3/darknet/darknet53.conv.74"
+retinanet_model_init=""
+train_on_dataset="mixed01"
+classes=1 #This is important, we train on mixed dataset but effectively train just one class.
+flip_on=False
+test_on_dataset="dataset0,dataset8,dataset10,dataset11,dataset12,dataset14"
+number_of_repetitions=3
+
+
+start #The original six class comparison with hetero classes.
+faster_rcnn_model_init=""
+darknet2_model_init="/home/molimm2/dwaithe/object_detection/darknet2/darknet/darknet19_448.conv.23"
+darknet3_model_init="/home/molimm2/dwaithe/object_detection/darknet3/darknet/darknet53.conv.74"
+retinanet_model_init=""
+train_on_dataset="mixed00"
+classes=6 #This is important, we train on mixed dataset.
+flip_on=False
+test_on_dataset="mixed00"
+number_of_repetitions=3
+

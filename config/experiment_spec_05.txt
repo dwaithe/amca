@@ -15,7 +15,7 @@ train_on_dataset="dataset15"
 classes=1
 flip_on=True
 test_on_dataset="dataset15"
-number_of_repetitions=1
+number_of_repetitions=3
 
 
 start #Erythroid dataset only the healthy non-blobby the cells.

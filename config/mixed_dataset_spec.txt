@@ -1,6 +1,6 @@
 #Mixed dataset specification file:
 
-#The main mixed dataset used for the paper.
+#The main mixed dataset used for the paper with hetero classes.
 mixed_dataset=0
 dir="mixed_hetero/2018/"
 type='hetero'
@@ -11,7 +11,7 @@ dn_testing_set_name="test_dn_n"
 rn_training_set_name="train_rn_n"
 rn_testing_set_name="test_rn_n"
 
-#The main mixed dataset used for the paper.
+#The main mixed dataset used for the paper with homo classes.
 mixed_dataset=1
 dir="mixed_homo/2018/"
 type='homo'
@@ -31,4 +31,4 @@ dn_mixed_class_name="obj_mixed_class"
 dn_training_set_name="train_dn_n"
 dn_testing_set_name="test_dn_n"
 rn_training_set_name="train_rn_n"
-rn_testing_set_name="test_rn_n"
+rn_testing_set_name="test_rn_n" 

@@ -98,7 +98,7 @@ training_images=55
 testing_images=55
 cell_class="cell - hek peroxisome"
 
-#Hek peroxisome class, full data, but only the punctuate cells:
+#Hek peroxisome class, full data:
 dataset=14
 dir="hek_peroxisome_all_class/2018/"
 training_images=55
