@@ -4,7 +4,7 @@
 ### It can be parsed by run_bulk_exp.py tuned for darknet, Faster-RCNN and YOLOv2v3
 ### If not training, keep "train_on_dataset= " blank."" 
 
-out_file_log="single_datasets_dk3yolov2AB" 
+out_file_log="single_datasets_dk3" 
 #dataset0,dataset8,dataset10,dataset11,dataset12,dataset14
 
 start #neuroblastoma 180
