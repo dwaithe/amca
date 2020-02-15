@@ -68,8 +68,8 @@ PORT = 4064
 //  parameters to edit
 dataset_id = 4253
 local_folder_path = "/Users/dwaithe/Documents/collaborators/WaitheD/micro_vision/acquisitions/slide2/data_correct_dim_order/"
-USERNAME = "dwaithe"
-PASSWORD = 'TR@N$late1thisnow'
+USERNAME = ""
+PASSWORD = ''
 
 def connect_to_omero() {
     "Connect to OMERO"
