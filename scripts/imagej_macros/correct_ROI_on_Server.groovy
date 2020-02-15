@@ -62,7 +62,7 @@ import ij.plugin.frame.RoiManager
 // =====
 
 // OMERO Server details
-HOST = "cbomero.imm.ox.ac.uk"
+HOST = ""
 PORT = 4064
 
 //  parameters to edit
