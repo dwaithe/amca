@@ -4,9 +4,8 @@
 ### It can be parsed by run_bulk_exp.py tuned for darknet, Faster-RCNN and YOLOv2v3
 ### If not training, keep "train_on_dataset= " blank."" 
 
-out_file_log="single_datasets_dk3_flip" 
+out_file_log="single_datasets_dk3_no_flip" 
 #dataset0,dataset8,dataset10,dataset11,dataset12,dataset14
-
 start #neuroblastoma 180
 faster_rcnn_model_init=""
 darknet2_model_init="/home/molimm2/dwaithe/object_detection/darknet2/darknet/darknet19_448.conv.23"
@@ -14,7 +13,7 @@ darknet3_model_init="darknet53.conv.74"
 retinanet_model_init=""
 train_on_dataset="dataset0"
 classes=1
-flip_on=True
+flip_on=False
 test_on_dataset="dataset0"
 number_of_repetitions=3
 
@@ -25,7 +24,7 @@ darknet3_model_init="darknet53.conv.74"
 retinanet_model_init=""
 train_on_dataset="dataset8"
 classes=1
-flip_on=True
+flip_on=False
 test_on_dataset="dataset8"
 number_of_repetitions=3
 
@@ -36,7 +35,7 @@ darknet3_model_init="darknet53.conv.74"
 retinanet_model_init=""
 train_on_dataset="dataset10"
 classes=1
-flip_on=True
+flip_on=False
 test_on_dataset="dataset10"
 number_of_repetitions=3
 
@@ -47,7 +46,7 @@ darknet3_model_init="darknet53.conv.74"
 retinanet_model_init=""
 train_on_dataset="dataset11"
 classes=1
-flip_on=True
+flip_on=False
 test_on_dataset="dataset11"
 number_of_repetitions=3
 
@@ -58,7 +57,7 @@ darknet3_model_init="darknet53.conv.74"
 retinanet_model_init=""
 train_on_dataset="dataset12"
 classes=1
-flip_on=True
+flip_on=False
 test_on_dataset="dataset12"
 number_of_repetitions=3
 
@@ -69,6 +68,6 @@ darknet3_model_init="darknet53.conv.74"
 retinanet_model_init=""
 train_on_dataset="dataset14"
 classes=1
-flip_on=True
+flip_on=False
 test_on_dataset="dataset14"
 number_of_repetitions=3

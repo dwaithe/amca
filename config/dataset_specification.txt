@@ -5,53 +5,53 @@ dataset=0
 dir="neuroblastoma_phal_class/2018/"
 training_images=180
 testing_images=180
-cell_class="cell - neuroblastoma phalloidin dapi"
+cell_class="cell - neuroblastoma phalloidin"
 
 #neuroblastoma phalloidin class, 25 training images:
 dataset=1
 dir="neuroblastoma_phal_class/2018/"
 training_images=25
 testing_images=180
-cell_class="cell - neuroblastoma phalloidin dapi"
+cell_class="cell - neuroblastoma phalloidin"
 
 #neuroblastoma phalloidin class, 50 training images:
 dataset=2
 dir="neuroblastoma_phal_class/2018/"
 training_images=50
 testing_images=180
-cell_class="cell - neuroblastoma phalloidin dapi"
+cell_class="cell - neuroblastoma phalloidin"
 
 #neuroblastoma phalloidin class, 75 training images:
 dataset=3
 dir="neuroblastoma_phal_class/2018/"
 training_images=75
 testing_images=180
-cell_class="cell - neuroblastoma phalloidin dapi"
+cell_class="cell - neuroblastoma phalloidin"
 
 #neuroblastoma phalloidin class, 100 training images:
 dataset=4
 dir="neuroblastoma_phal_class/2018/"
 training_images=100
 testing_images=180
-cell_class="cell - neuroblastoma phalloidin dapi"
+cell_class="cell - neuroblastoma phalloidin"
 
 #neuroblastoma phalloidin class, 125 training images:
 dataset=5
 dir="neuroblastoma_phal_class/2018/"
 training_images=125
 testing_images=180
-cell_class="cell - neuroblastoma phalloidin dapi"
+cell_class="cell - neuroblastoma phalloidin"
 
 #neuroblastoma phalloidin class, 150 training images:
 dataset=6
 dir="neuroblastoma_phal_class/2018/"
 training_images=150
 testing_images=180
-cell_class="cell - neuroblastoma phalloidin dapi"
+cell_class="cell - neuroblastoma phalloidin"
 
-#neuroblastoma phalloidin class, 180 training images:
+#neuroblastoma phalloidin dapi class, 180 training images:
 dataset=7
-dir="neuroblastoma_phal_class/2018/"
+dir="neuroblastoma_phal_dapi_class/2018/"
 training_images=180
 testing_images=180
 cell_class="cell - neuroblastoma phalloidin dapi"
@@ -91,7 +91,7 @@ training_images=26
 testing_images=20
 cell_class="cell - fibroblast nucleopore"
 
-#Hek peroxisome class, full data, but only the punctuate cells:
+#Hek peroxisome class, full data, all the cells:
 dataset=13
 dir="hek_peroxisome_class/2018/"
 training_images=55
@@ -104,6 +104,21 @@ dir="hek_peroxisome_all_class/2018/"
 training_images=55
 testing_images=55
 cell_class="cell - hek peroxisome all"
+
+#Erythroid dapi class, full data, all the cells blebby and not:
+dataset=15
+dir="erythroid_dapi_all_class/2019/"
+training_images=51
+testing_images=50
+cell_class="cell - erythroid dapi all"
+
+#Erythroid dapi class, full data, only the non-blebby cells:
+dataset=16
+dir="erythroid_dapi_class/2019/"
+training_images=51
+testing_images=50
+cell_class="cell - erythroid dapi"
+
 
 
 
