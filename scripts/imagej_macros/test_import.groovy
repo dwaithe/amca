@@ -55,7 +55,7 @@ import ij.ImageStack
 import ij.process.ByteProcessor
 import ij.process.ShortProcessor
 import ij.plugin.frame.RoiManager
-
+import ij.measure.ResultsTable
 
 
 // Setup
@@ -66,8 +66,8 @@ HOST = ""
 PORT = 4064
 
 //  parameters to edit
-dataset_id = 4253
-local_folder_path = "/Users/dwaithe/Documents/collaborators/WaitheD/micro_vision/acquisitions/slide2/data_correct_dim_order/"
+dataset_id = 4252
+local_folder_path = ""
 USERNAME = ""
 PASSWORD = ''
 
