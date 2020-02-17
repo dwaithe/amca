@@ -58,7 +58,7 @@ class MS2000(object):
 
         if self.verbose: print(" --> Writing to MS2000: '%s\\r'" % cmd)
 
-        self.port.write(bytes(cmd, 'ascii'))
+        self.port.write(cmd.encode("utf-8"))
 
         self.port.write(b'\r')
 
@@ -738,7 +738,7 @@ if __name__ == '__main__':
 
     test_tl = False
 
-    test_stage = False
+    test_stage = True
 
     test_fw = False
 
@@ -748,7 +748,7 @@ if __name__ == '__main__':
 
     if test_stage:
 
-        ms = MS2000(which_port='COM1', verbose=True)
+        ms = MS2000(which_port='/dev/ttyUSB0', verbose=True)
 
         xyz = XYZStage(ms2000_obj=ms, axes=('X', 'y'),verbose=True)
 

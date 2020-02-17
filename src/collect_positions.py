@@ -1,41 +1,32 @@
 from control.stageXY_control import*
-import control.zpiezoPI as zpi
+import control.zpiezoPIcall as zpi
 
 from control.define_micro_path import*
 from ctypes import cdll
 import numpy
 import cv2
 import time
-from msvcrt import getch
+from getch import getch #import msvcrt on windows
+
+
 
 
 
 size_of_region = 200 #um
 step_size_z = 0.5
 
+#Initialize XY stage
+ms = MS2000(which_port='/dev/ttyUSB0', verbose=False)
+xyz = XYZStage(ms2000_obj=ms, axes=('X', 'y'),verbose=False)
 
-
-
+coords =[]
 
 
 
 if __name__ == "__main__":
-	axis = '3'
-	verbose = 1
-
-	pidll = cdll.LoadLibrary('c:/Users/immuser/Documents/E710_GCS_DLL/E7XX_GCS_DLL_x64.dll')
-	ID = pidll.E7XX_ConnectRS232(5,57600)
-
-	zpi.initiate_axis(pidll,ID, axis,verbose)
-	zpi.turn_servo_on(pidll,ID,axis,verbose)
-
-	zpi.move_piezo(pidll,ID,axis,10.,verbose)
 	
+	zpi._send_command('qpos', 10.0)	
 
-
-	ms = MS2000(which_port='COM1', verbose=False)
-	xyz = XYZStage(ms2000_obj=ms, axes=('X', 'y'),verbose=False)
-	coords = []
 
 	def  OnMouseOver(event, x, y, flags, param):
 		if event == cv2.EVENT_LBUTTONDOWN:
@@ -50,23 +41,21 @@ if __name__ == "__main__":
 
 		print(key)
 		if key == 56:
-			
-			qp = zpi.query_position(pidll,ID,axis,False)
-			zpi.move_piezo(pidll,ID,axis,qp + step_size_z,False)
+			qp = float(zpi._send_command('qpos', 0.0)['value'])
+			qp = zpi._send_command('zmove', str(qp+ step_size_z))['value']
 			time.sleep(0.1)
-			print('up',zpi.query_position(pidll,ID,axis,False))
+			print('moved up to: ',qp)
 		if key == 50:
 			
-			qp = zpi.query_position(pidll,ID,axis,False)
-			zpi.move_piezo(pidll,ID,axis,qp - step_size_z,False)
+			qp = float(zpi._send_command('qpos', '')['value'])
+			qp = zpi._send_command('zmove', str(qp- step_size_z))['value']
 			time.sleep(0.1)
-			print('down',zpi.query_position(pidll,ID,axis,False))
+			print('moved down to:',qp)
 		if key == 53:
-			print('r')
+			print('position saved.')
 			#name = input("Press enter to continue, or 'q' to finish and process inputs.")
 			pos = xyz.get_position()
-			zpi.check_for_errors(pidll,False)
-			pos['z'] = zpi.query_position(pidll,ID,axis,False)
+			pos['z'] =float(zpi._send_command('qpos', '')['value'])
 			
 			print('position saved',pos['x'],pos['y'],pos['z'])
 			coords.append([float(pos['x']),float(pos['y']), float(pos['z'])])
@@ -80,7 +69,7 @@ if __name__ == "__main__":
 	
 	xy_pts,z_pts = return_points(np_coords, size_of_region,step_size_z,False)
 	
-	with open('POS_FILE.txt', 'w') as the_file:
+	with open('../pos_files/POS_FILE.txt', 'w') as the_file:
 		
 		for x,y,z in zip(xy_pts[:,0],xy_pts[:,1],z_pts):
 			the_file.write(str(x)+'\t'+str(y)+'\t'+str(z)+'\n')
@@ -95,5 +84,5 @@ if __name__ == "__main__":
 	#plt.ylim(-0.1,1.1)
 	plt.show()
 
-
-	pidll.E7XX_CloseConnection(ID)
+zpi._send_command('close', '')
+	

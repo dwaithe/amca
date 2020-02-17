@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+#!python3
 
 # --------------------------------------------------------
-# Tensorflow Faster R-CNN
-# Licensed under The MIT License [see LICENSE for details]
-# Written by Xinlei Chen, based on code from Ross Girshick
+# AMCA - Automated Microscope Control Algorithm
+# by Dominic Waithe
+# 
 # --------------------------------------------------------
 
 """
@@ -11,67 +11,46 @@ Demo script showing detections in sample images.
 
 See README.md for installation instructions before running.
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
+#General imports.
 import argparse
 import os
-
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-import tensorflow as tf
-import sys 
-sys.path.append("C:/Users/immuser/Documents/micro_vision/Faster-RCNN-TensorFlow-Python3.5-master/")
-sys.path.append("C:/Users/immuser/Documents/micro_vision/ijpython_roi")
-from lib.config import config as cfg
-from lib.utils.nms_wrapper import nms
-from lib.utils.test import im_detect
-#from nets.resnet_v1 import resnetv1
-from lib.nets.vgg16 import vgg16
-from lib.utils.timer import Timer
-import time as time
-import matplotlib.pyplot as plt
-import numpy as np
-import time
-from control.stageXY_control import*
-import control.zpiezoPI as zpi
 import tifffile
 import sys
-sys.path.append('ijpython_roi')
-from ij_roi import Roi
-from ijpython_encoder import encode_ij_roi, RGB_encoder
+import time
 
-from ctypes import cdll
+#darknet3AB import
+sys.path.append("../../darknet3AB/darknet")
+import darknet as dk
+import darknet_video as dkv
 
-axis = '3'
-verbose = 1
+#Stage control.
+from control.stageXY_control import*
+import control.zpiezoPIcall as zpi
 
-pidll = cdll.LoadLibrary('c:/Users/immuser/Documents/E710_GCS_DLL/E7XX_GCS_DLL_x64.dll')
-ID = pidll.E7XX_ConnectRS232(5,57600)
+#ROI library for tifffile to make ROI compatible with ImageJ
 
-zpi.initiate_axis(pidll,ID, axis,verbose)
-zpi.turn_servo_on(pidll,ID,axis,verbose)
-zpi.check_for_errors(pidll,verbose)
-zpi.query_position(pidll,ID,axis,verbose)
-import cv2
+from ijroi.ij_roi import Roi
+from ijroi.ijpython_encoder import encode_ij_roi, RGB_encoder
 
-
-try:
-	# This will create a new file or **overwrite an existing file**.
-	fout = open("file_pos_export.txt", "w")
-	
-except: 
-	IOError
+#Import camera libary.
+from pyvcam import pvc
+from pyvcam.camera import Camera
 
 
 
-ms = MS2000(which_port='COM1', verbose=False)
+
+
+
+
+ms = MS2000(which_port='/dev/ttyUSB0', verbose=False)
 xyz = XYZStage(ms2000_obj=ms, axes=('X', 'y'),verbose=False)
 
 
-plt.ion()
+#plt.ion()
 class DynamicUpdate():
 	def __init__(self):
 
@@ -81,14 +60,8 @@ class DynamicUpdate():
 		self.pos_y = []
 		self.pos_z = []
 		self.regions = {}
-		with open('POS_FILE.txt', 'r') as f:
-
-			for line in f:
-				items = line.split('\t')
-				self.pos_x.append(float(items[0]))
-				self.pos_y.append(float(items[1]))
-				self.pos_z.append(float(items[2].split('\n')[0]))
-		print('file positions loaded.')
+		
+		
 
 		self.pos_index = 0
 		self.z_index = 1
@@ -105,106 +78,77 @@ class DynamicUpdate():
 		self.voxel_xy = 0.26 #um
 
 
-		#Query postion of stage x and y.
-		self.pos = xyz.get_position()
-		self.on_move(self.pos_x[0],self.pos_y[0],self.pos_z[0])
-	
-		#float(zpi.query_position(pidll,ID,axis,verbose=True))
-
-	
-
-	def on_launch(self):
-		#Set up plot
-		self.figure, self.ax = plt.subplots()
-		thismanager = plt.get_current_fig_manager()
-		sxpos = 2050
-		sypos = 59
-		swpos = 569
-		shpos = 498
-		#(2171, 123, 332, 371)
-		thismanager.window.setGeometry(sxpos+8, sypos+31, swpos-16, shpos-39)
-		self.lines, = self.ax.plot([],[], '-')
-		self.figure.patch.set_facecolor('black')
-		self.ax.set_axis_bgcolor("black")
 		
-
-				#Autoscale on unknown axis and known lims on the other
-		self.ax.set_autoscaley_on(True)
-		self.ax.set_xlim(self.lim_min_x, self.lim_max_x)
-		self.ax.set_ylim(self.lim_min_y, self.lim_max_y)
-		#Other stuff
-		self.ax.grid()
-		#...
-
-	def on_running_test(self, xdata, ydata):
-		#Update data (with the new _and_ the old points)
-		self.lines.set_xdata(xdata[-4:])
-		self.lines.set_ydata(ydata[-4:])
 		
-		#Need both of these in order to rescale
-		self.figure.canvas.draw()
-		self.figure.canvas.flush_events()
-	def on_running(self,scores,boxes,thresh,NMS_THRESH,intensity_score,save_boxes):
+		
+	def load_positions(self,path):
+		"""This will read the position file which should have been defined before this script.
+		--------------
+		inputs:
+		path - path to file.
+		outputs:
+		None, but populates class pos_x ,pos_y, pos_z coordinate lists.		
+		"""
+		with open(path, 'r') as f:
+
+			for line in f:
+				items = line.split('\t')
+				self.pos_x.append(float(items[0]))
+				self.pos_y.append(float(items[1]))
+				self.pos_z.append(float(items[2].split('\n')[0]))
+		print('file positions loaded.')
+	def init_output_positions(self,path):
+		""" This will create the file which is the destination for the output coordinates.
+		--------------
+		inputs:
+		path - path to file to be created for output positions.
+		outputs:
+		None, but creates file for output, assessible through instance of class.
+		"""
+		try:
+			d.fout = open(path, "w")
+		except: 
+			#IOError
+			pass
+	
+
+	def on_running(self,detections):
 		sf = 3.4 #This is the ratio for correcting the visual output to the correct size.
-		frame = np.zeros((int(512./sf),int(512./sf),3),np.uint8)
+		frame = np.zeros((int(self.lim_max_x),int(self.lim_max_y),3),np.uint8)
 		key = cv2.waitKey(1)
 		self.regions[self.stage_pos_z] = []
-		cls_ind = self.class_to_sample
+		
+		d.detect_coords = []
+		for detection in detections:
+			x = (float(detection[2][0])/d.output_wid)*self.lim_max_x
+			y = (float(detection[2][1])/d.output_wid)*self.lim_max_y
+			w = (float(detection[2][2])/d.output_wid)*self.lim_max_x
+			h = (float(detection[2][3])/d.output_wid)*self.lim_max_y
+			xmin = int(round(x - (w / 2)))
+			xmax = int(round(x + (w / 2)))
+			ymin = int(round(y - (h / 2)))
+			ymax = int(round(y + (h / 2)))
+			score = detection[1]
+			d.detect_coords.append([x,y,w,h,xmin,xmax,ymin,ymax,score])
+			pt1 = (xmin, ymin)
+			pt2 = (xmax, ymax)
+			
+
+			cv2.rectangle(frame, pt1,pt2, (0,255,0),1)
+			self.regions[self.stage_pos_z].append([xmin,ymin,w,h])
+
 				
-		cls_boxes = boxes[:, 4 * cls_ind:4 * (cls_ind + 1)]
-		cls_scores = scores[:, cls_ind]
-		dets = np.hstack((cls_boxes,cls_scores[:, np.newaxis])).astype(np.float32)
-		keep = nms(dets, NMS_THRESH)
-		self.dets = dets[keep, :]
-		intensity_score = intensity_score[keep]
-
-		# These are bigger regions which predict into adjacent image regions.
-		#save_cls_boxes = save_boxes[:, 4 * cls_ind:4 * (cls_ind + 1)]
-		#save_dets = np.hstack((save_cls_boxes,cls_scores[:, np.newaxis])).astype(np.float32)
-		#self.save_dets = save_dets[keep,:]
-		
-		
-		
-		self.inds = np.where(self.dets[:, -1] >= thresh)[0]
-		
-		
-
-		if len(self.inds) > 0:
-			for i in self.inds:
-				bbox = self.dets[i, :4]
-				score = self.dets[i, -1]
-				intensity = intensity_score[i]
-				#cv2.rectangle(im, (bbox[0],bbox[1]), (bbox[2],bbox[3]), (255,0,0), 3)
-				#self.ax.plot((bbox[0],bbox[1],bbox[1],bbox[0]),(bbox[2],bbox[3],bbox[2],bbox[3]))
-				hei = bbox[3] - bbox[1]
-				wid = bbox[2] - bbox[0]
-				#self.ax.add_patch(plt.Rectangle((bbox[0], self.lim_max_y-bbox[1]-hei),wid,hei, fill=False,edgecolor='red', linewidth=3.5))
-
-				cvx = int(bbox[0]/sf)
-				cvy = int((self.lim_max_y-bbox[1]-hei)/sf)
-				cvw = int(cvx+(wid/sf))
-				cvh = int(cvy+(hei/sf))
-
-				cv2.rectangle(frame, (cvx,cvy),(cvw,cvh), (0,255,0),1)
-				self.regions[self.stage_pos_z].append([bbox[0],bbox[1],wid,hei])
-
-				#Now we are exporting the save regions. These are bigger regions which predict into adjacent image regions.
+			
+			xoutpos = self.voxel_xy*xmin
+			youtpos = self.voxel_xy*ymin
+			woutpos = self.voxel_xy*h
+			houtpos = self.voxel_xy*w
 				
-				#sbbox = self.save_dets[i, :4]
-				#if np.sum(np.array(sbbox)-np.array(bbox))!=0:
-				#	print('sbbox',np.array(sbbox),'bbox',np.array(bbox))
-				
-				hei = bbox[3] - bbox[1]
-				wid = bbox[2] - bbox[0]
-				xoutpos = self.voxel_xy*bbox[0]
-				youtpos = self.voxel_xy*bbox[1]
-				woutpos = self.voxel_xy*wid
-				houtpos = self.voxel_xy*hei
-				
-				fout.writelines(str(self.stage_pos_x)+","+str(self.stage_pos_y)+","+str(self.stage_pos_z)+","+str(xoutpos)+","+str(youtpos)+","+str(woutpos)+","+str(houtpos)+","+str(score)+"\n")			
-				#Need both of these in order to rescale
+			d.fout.writelines(str(self.stage_pos_x)+","+str(self.stage_pos_y)+","+str(self.stage_pos_z)+","+str(xoutpos)+","+str(youtpos)+","+str(woutpos)+","+str(houtpos)+","+str(score)+"\n")			
+			#Need both of these in order to rescale
 		
 		cv2.imshow('frame',frame)
+		#k = cv2.waitKey(0)
 		
 
 	def on_move(self,stage_move_x,stage_move_y,stage_move_z):
@@ -214,125 +158,36 @@ class DynamicUpdate():
 		
 		print('xyz',self.stage_pos_x,self.stage_pos_y,self.stage_pos_z)
 		xyz.move(x_um = self.stage_pos_x, y_um = self.stage_pos_y, blocking=False)
-		zpi.move_piezo(pidll,ID,axis,self.stage_pos_z,verbose)
-		
-		#print("set_xyz",self.stage_pos_x, self.stage_pos_y, self.stage_pos_z)
-		#print("act_xyz",zpi.query_position(pidll,ID,axis,verbose=True))
-
-	#Example
-	def __call__(self):
-		
-		self.on_launch()
-		#xdata = []
-		#ydata = []
-		#for x in np.arange(0,100,0.5):
-		#    xdata.append(x)
-		#    ydata.append(np.exp(-x**2)+10*np.exp(-(x-7)**2))
-		#    self.on_running(xdata, ydata)
-			
-		#return xdata, ydata
-
-d = DynamicUpdate()
-d()
-
-CLASSES = ('__background__',
-											'aeroplane', 'bicycle', 'bird', 'boat',
-											'bottle', 'bus', 'car', 'cat', 'chair',
-											'cow', 'diningtable', 'dog', 'horse',
-											'motorbike', 'person', 'pottedplant',
-											'sheep', 'sofa', 'train', 'tvmonitor','cell')
-
-NETS = {'vgg16': ('vgg16_faster_rcnn_iter_15000.ckpt',), 'res101': ('res101_faster_rcnn_iter_110000.ckpt',)}
-d.CLASSES = ('__background__', 'cell - neuroblastoma phalloidin','cell - erythroblast dapi','cell - c127 dapi', 'cell - eukaryote dapi','cell - fibroblast nucleopore','cell - hela peroxisome all')
-d.class_to_sample = 3
-NETS = {'C127': ('vgg16_faster_rcnn_iter_20000.ckpt',)}
-DATASETS = {'pascal_voc': ('voc_2007_trainval',), 'pascal_voc_0712': ('voc_2007_trainval+voc_2012_trainval',)}
-xdata = []
-ydata = []
-
-sf =2
-frame = np.zeros((int(512./sf),int(512./sf),3),np.uint8)
-cv2.imshow('frame',frame)
-d.t1 = time.time()
+		zpi._send_command('zmove',self.stage_pos_z)
 
 
 
 
-def analyzeAndMove(arr):
+def analyzeAndMove(detections):
 	"""Detect object classes in an image using pre-computed object proposals."""
-
 	
-	#
-	#image_name = '000456.jpg'
-
-	# Load the demo image
-	#im_file = os.path.join(cfg.FLAGS2["data_dir"], 'demo', image_name)
-	
-	if arr.shape[0] == 1024*1024:
-		im = np.zeros((1024,1024,3))
-		imput = np.array(arr).reshape(1024,1024)
-	elif arr.shape[0] == 512*512:
-		im = np.zeros((512,512,3))
-		imput = np.array(arr).reshape(512,512)
-	else:
-		print ('arrshape',arr.shape[0])
-	#opp = cv2.imread(im_file)
-	#print(opp.shape)
-	
-	im[:,:,0] =imput
-	im[:,:,1] =imput
-	im[:,:,2] =imput
-	
-	im = (im/np.max(im))*255.0
-	
-
-
-	
+	###There has to be a bit of a delay to allow stage to catch up.
 	delay = False
-	#im = opp
-	# Detect all object classes and regress object bounds
 	
-	print("time:",time.time()-d.t1)
+	# Detect all object classes and regress object bounds
+	try:
+		print("time:",time.time()-d.t1)
+	except:
+		pass
 	
 	d.t1 = time.time()
-	scores, boxes, save_boxes = im_detect(sess, net, im[:,:,:])
-	intensity_score = []
-	for bbox in boxes:
-		
-		intensity_score.append(np.sum(im[int(bbox[1]):int(bbox[3]),int(bbox[0]):int(bbox[2]),0]))
-	if intensity_score.__len__()>0:
-		intensity_score = np.array(intensity_score)
-		intensity_score = (intensity_score/np.max(intensity_score))*255.
-
-	#timer.toc()
-	#print('time',time.time(),'Detection took {:.3f}s for {:d} object proposals'.format(timer.total_time, boxes.shape[0]))
-
-	# Visualize detections for each class
-	thresh = 0.5
-	NMS_THRESH = 0.5
-	d.on_running(scores,boxes,thresh,NMS_THRESH,intensity_score,save_boxes)
-
-	plt.ioff()
-	plt.figure()
-	currentAxis = plt.gca()
-	plt.imshow(imput)
 	
-	if len(d.inds) > 0:
-		#Save image to stack.
-		d.img_stk[d.stage_pos_z] = imput
+	
+	intensity_score = []
+	d.on_running(detections)
 
-	#print('d.naive',d.naive,'d.inds',d.inds)
 	if d.naive == True:
-		if len(d.inds) > 0:
+		if len(d.detect_coords) > 0:
 			#This is the first time this image is seen and we have detected regions. 
 			d.description[d.stage_pos_z] = []
-			for i in d.inds:
-				bbox = d.dets[i, :4]
-				score = d.dets[i, -1]
-				hei = bbox[3] - bbox[1]
-				wid = bbox[2] - bbox[0]
-				#currentAxis.add_patch(plt.Rectangle((bbox[0], bbox[1]), wid, hei, fill=False, edgecolor='red', linewidth=3.5))
-				d.description[d.stage_pos_z].append(str(score)+','+str(bbox[0])+','+str(bbox[1])+','+str(wid)+','+str(hei))
+			for detect in d.detect_coords:
+				x,y,w,h,xmin,xmax,ymin,ymax,score = detect
+				d.description[d.stage_pos_z].append(str(score)+','+str(xmin)+','+str(ymin)+','+str(w)+','+str(h))
 			
 			d.naive = False
 			d.scanning_up = True
@@ -347,15 +202,11 @@ def analyzeAndMove(arr):
 
 	else:
 			
-			if len(d.inds) > 0:
+			if len(d.detect_coords) > 0:
 				d.description[d.stage_pos_z] = []
-				for i in d.inds:
-					bbox = d.dets[i, :4]
-					score = d.dets[i, -1]
-					hei = bbox[3] - bbox[1]
-					wid = bbox[2] - bbox[0]
-					#currentAxis.add_patch(plt.Rectangle((bbox[0], bbox[1]), wid, hei, fill=False, edgecolor='red', linewidth=3.5))
-					d.description[d.stage_pos_z].append(str(score)+','+str(bbox[0])+','+str(bbox[1])+','+str(wid)+','+str(hei))
+				for detect in d.detect_coords:
+					x,y,w,h,xmin,xmax,ymin,ymax,score = detect
+					d.description[d.stage_pos_z].append(str(score)+','+str(xmin)+','+str(ymin)+','+str(w)+','+str(h))
 			else:
 				#If there are no more regions.
 				if d.scanning_up == True and d.scanning_down == False:
@@ -366,7 +217,7 @@ def analyzeAndMove(arr):
 					delay = True
 				
 				elif d.scanning_up == False and d.scanning_down == True:
-					#print('direction changed.')
+					## We have scanned up and down. No more cells. So we save and reset.
 					d.scanning_down = False
 					d.scanning_up = False
 					d.naive = True
@@ -378,47 +229,53 @@ def analyzeAndMove(arr):
 						names.append(float(name))
 					names.sort()
 
-					#print("names",names)
-					np_stk = np.zeros((len(names),d.lim_max_y,d.lim_max_x)).astype(np.float32)
-					c = 0
+					## Numpy stack of the correct size.
+					np_stk = np.zeros((len(names),d.ch_to_save,d.lim_max_y,d.lim_max_x)).astype(np.float32)
+					z = 0
 					
-					data = []
+					lets_get_meta = []
 					for name in names:
-						np_stk[c,:,:] = d.img_stk[name]
+						for ch in range(0,d.ch_to_save):
+							np_stk[z,ch,:,:] = d.img_stk[name][ch].astype(np.uint16)
 						regions = d.regions[name]
 						
-						c+=1
+						z+=1
 					
 						for reg in regions:
-
-							roi_b = Roi(reg[0],reg[1],reg[2],reg[3], np_stk.shape[1],np_stk.shape[2],0)
+							#print(reg[0],reg[1],reg[2],reg[3])
+							r0 = np.clip(reg[0],0,d.lim_max_x)
+							r1 = np.clip(reg[1],0,d.lim_max_y)
+							r2 = np.clip(reg[2],0,d.lim_max_x)
+							r3 = np.clip(reg[3],0,d.lim_max_y)
+							roi_b = Roi(r0,r1,r2,r3, np_stk.shape[2],np_stk.shape[3],0)
 							roi_b.name = "Region 1"
 							roi_b.roiType = 1
-							roi_b.position = c
-							roi_b.strokeLineWidth = 3.0
+							roi_b.setPositionH(1,z,-1)
+							roi_b.strokeLineWidth = 1.0
 							roi_b.strokeColor = RGB_encoder(255,255,0,0)
-							data.append(encode_ij_roi(roi_b))
+							lets_get_meta.append(encode_ij_roi(roi_b))
 
-					metadata = {'hyperstack': True ,'ImageJ': '1.52g', 'Overlays':data , 'loop': False}
-					tifffile.imsave("C:/Users/immuser/Documents/micro_vision/out/img_stk_x_"+str(d.stage_pos_x)+"y_"+str(d.stage_pos_y)+".tif",np_stk,shape=np_stk.shape,imagej=True,ijmetadata=metadata)
+					
+					metadata = {}
+					metadata['hyperstack'] = True
+					metadata['slices'] = np_stk.shape[0]
+					metadata['channels'] =np_stk.shape[1]
+					metadata['images'] = np.sum(np_stk.shape)
+					metadata['ImageJ'] = '1.52g'
+					metadata['Overlays']= lets_get_meta
+					metadata['loop'] = False
+					resolution = (d.voxel_xy/1000000.,d.voxel_xy/1000000.,'cm')
+					out_file_path = d.out_path+"img_stk_x_"+str(d.stage_pos_x)+"y_"+str(d.stage_pos_y)+".tif"
+					tifffile.imsave(out_file_path,np_stk,shape=np_stk.shape,resolution=resolution,imagej=True,ijmetadata=metadata)
 					d.img_stk = {}
 					d.regions = {}
 				
 	
-	#If we find regions then scan above and below until they are done.
-	
-					
-	#plt.savefig('out/out'+str(time.time())+'.tif')
-	plt.close()
-		#ax.add_patch(plt.Rectangle((bbox[0], bbox[1]),bbox[2] - bbox[0],bbox[3] - bbox[1], fill=False,edgecolor='red', linewidth=3.5))"""
-	#plt.show()
-								
-	#im[0:240,0:240,0] = 255
-	
-	#cv2.imwrite('out'+str(time.time())+'.tif',im)
 
 
-	
+
+
+	### What is the next movement to fulfill.
 	if d.naive == True:
 		d.on_move(d.pos_x[d.pos_index],d.pos_y[d.pos_index],d.pos_z[d.pos_index])
 		time.sleep(1)
@@ -437,56 +294,130 @@ def analyzeAndMove(arr):
 			delay = False
 		
 	return "session"
-def parse_args():
-	"""Parse input arguments."""
-	parser = argparse.ArgumentParser(description='Tensorflow Faster R-CNN demo')
-	parser.add_argument('--net', dest='demo_net', help='Network to use [vgg16 res101]',
-																					choices=NETS.keys(), default='res101')
-	parser.add_argument('--dataset', dest='dataset', help='Trained dataset [pascal_voc pascal_voc_0712]',
-																					choices=DATASETS.keys(), default='pascal_voc_0712')
-	args = parser.parse_args()
-
-	return args
 
 
 
-args = parse_args()
+
+
+if __name__ == '__main__':
+
+	print("Intializing data object")
+	d = DynamicUpdate()
+	
+	print("initializing camera")
+	
+	pvc.init_pvcam()
+	cam = [cam for cam in Camera.detect_camera()][0]
+	cam.open()
+	cam.gain = 1
+	cam.binning = 2
+	digital_binning = 2
+	cam.exp_mode ="Timed"
+	cam.exp_out_mode = 0
+	###The number of channels to image.
+	ch_to_image = 3 #Number of channels.
+	exposures = [100, 300,300] ##Remember to coordinate with order in lamp.
+	###The number of channels to analyze.
+	ch_to_analyze = 1 ##Will always take first from available. Number not index.
+	###The number of channels to save.
+	ch_to_save = 3 ##Less than equal to ch_to_image, usually the same.
+	
+	d.ch_to_save = ch_to_save
+	###Input and output.
+	d.out_path = "/media/nvidia/UNTITLED/acquisitions/0001/"
+	positions_file_path = "../pos_files/POS_FILE.txt"
+	output_positions_file = "../pos_files/file_pos_export.txt"
+	
+	
+	
+	
+	config_path = "../../darknet3AB/darknet/cfg/yolov2_dk3AB-classes-1-flip.cfg"
+	meta_path =  "../../cell_datasets/c127_dapi_class/2018/obj_c127_dapi_class30.data"
+	weight_path = "../../models/darknet/c127_dapi_class30/yolov2_dk3AB-classes-1-no-flip_final.weights" 
+	
+	###Loads and creates input and output files.
+	d.load_positions(positions_file_path)
+	d.init_output_positions(output_positions_file)
+	### Loads the network in.
+	netMain = dk.load_net_custom(config_path.encode("ascii"), weight_path.encode("ascii"), 0, 1)
+	metaMain = dk.load_meta(meta_path.encode("ascii"))
+	
+	#Query postion of stage x and y.
+	#d.pos = xyz.get_position()
+	d.on_move(d.pos_x[0],d.pos_y[0],d.pos_z[0])
+	
+	###Just some tests before we engage.
+	assert ch_to_image <= exposures.__len__(), "please define <= number of exposures as channels to image."
+	
+	
+	#####The main loop. This will keep going till all the stage positions have been visited.
+	while True:
+		## Collect frame
+		if ch_to_image >= 1:
+			frame_CH1 = cam.get_frame(exp_time=exposures[0])[::2,::2]
 			
-
-# model path
-demonet = 'C127'
-dataset = args.dataset
-tfmodel = os.path.join('C:/Users/immuser/Documents/micro_vision/Faster-RCNN-TensorFlow-Python3.5-master/output', demonet, DATASETS[dataset][0], 'default', NETS[demonet][0])
-
-if not os.path.isfile(tfmodel + '.meta'):
-				print(tfmodel)
-				raise IOError(('{:s} not found.\nDid you download the proper networks from '
-																			'our server and place them properly?').format(tfmodel + '.meta'))
-
-# set config
-tfconfig = tf.ConfigProto(allow_soft_placement=True)
-tfconfig.gpu_options.allow_growth = True
-
-# init session
-sess = tf.Session(config=tfconfig)
-# load network
-#if demonet == 'vgg16':
-net = vgg16(batch_size=1)
-# elif demonet == 'res101':
-				# net = resnetv1(batch_size=1, num_layers=101)
-#else:
-#    raise NotImplementedError
-net.create_architecture(sess, "TEST", d.CLASSES.__len__() ,tag='default', anchor_scales=[8, 16, 32])#Change the third argument to represent number of classes.
-#saver = tf.train.Saver()
-saver = tf.train.Saver()
-saver.restore(sess, tfmodel)
-
-print('Loaded network {:s}'.format(tfmodel))
-
-im_names = ['000456.jpg', '000457.jpg', '000542.jpg', '001150.jpg',
-												'001763.jpg', '004545.jpg']
-
-# demo()
-
+		if ch_to_image >= 2:
+			frame_CH2 = cam.get_frame(exp_time=exposures[1])[::2,::2]
+		
+		if ch_to_image >= 3:
+			frame_CH3 = cam.get_frame(exp_time=exposures[2])[::2,::2]
+			
+		
+		print(frame_CH1.shape)
+		print("Running AMCA")
+		
+		if frame_CH1.shape[0] == 1024:
+				im = np.zeros((1024,1024,3))
+				
+		elif frame_CH1.shape[0] == 512:
+				im = np.zeros((512,512,3))
+		else:
+			print('unusual image shape',frame_CH1.shape[0])
+			exit()
+		
+		print('recalculating')
+		if ch_to_analyze == 1:
+			frame_CH1_n = (frame_CH1/np.max(frame_CH1))*255.0		
+			im[:,:,0] = frame_CH1_n
+			im[:,:,1] = frame_CH1_n
+			im[:,:,2] = frame_CH1_n
+		
+		elif ch_to_analyze == 2:
+			frame_CH1_n = (frame_CH1/np.max(frame_CH1))*255.0
+			frame_CH2_n = (frame_CH2/np.max(frame_CH2))*255.0
+			im[:,:,0] =frame_CH1_n
+			im[:,:,1] =frame_CH2_n	
+		
+		elif ch_to_analyze.__len__() == 3:
+			frame_CH1_n = (frame_CH1/np.max(frame_CH1))*255.0
+			frame_CH2_n = (frame_CH2/np.max(frame_CH2))*255.0
+			frame_CH3_n = (frame_CH3/np.max(frame_CH3))*255.0
+			im[:,:,0] =frame_CH1_n
+			im[:,:,1] =frame_CH2_n
+			im[:,:,2] =frame_CH3_n
+			
+		im = im.astype(np.uint8)
+		d.output_wid = dk.network_width(netMain)
+		
+		darknet_image = dk.make_image(dk.network_width(netMain),dk.network_height(netMain),3)
+		frame_resized = cv2.resize(im,(dk.network_width(netMain),dk.network_height(netMain)),interpolation=cv2.INTER_LINEAR)
+		
+		dk.copy_image_from_bytes(darknet_image,frame_resized.tobytes())
+		
+		
+		detections = dk.detect_image(netMain, metaMain, darknet_image, thresh=0.50)
+		if len(detections) > 0:
+			#Save image to stack.
+			if ch_to_save == 1:
+				d.img_stk[d.stage_pos_z] = frame_CH1
+			if ch_to_save == 2:
+				d.img_stk[d.stage_pos_z] = [frame_CH1,frame_CH2]
+			if ch_to_save == 3:
+				d.img_stk[d.stage_pos_z] = [frame_CH1,frame_CH2,frame_CH3]
+		analyzeAndMove(detections)
+		
+	
+	cam.close()
+	pvc.uninit_pvcam()
 
 			

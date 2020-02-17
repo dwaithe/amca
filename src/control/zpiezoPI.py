@@ -1,5 +1,6 @@
 from ctypes import*
-
+import json
+import socket
 def initiate_axis(pidll,ID, axis,verbose=False):
 	""" 
 	Initiate PI controller along an axis.
@@ -148,13 +149,72 @@ if __name__ == "__main__":
 	axis = '3'
 	verbose = 1
 
-	pidll = cdll.LoadLibrary('c:/Users/immuser/Documents/E710_GCS_DLL/E7XX_GCS_DLL_x64.dll')
-	ID = pidll.E7XX_ConnectRS232(5,57600)
+	pidll = cdll.LoadLibrary('c:/Documents and Settings/LattePanda/Downloads/E710/E710/E7XX_GCS_DLL_x64.dll')
+	port = 4
+	print('port',port)
+	ID = pidll.E7XX_ConnectRS232(port,57600)
 
 	initiate_axis(pidll,ID, axis,verbose)
 	turn_servo_on(pidll,ID,axis,verbose)
-	move_piezo(pidll,ID,axis,4.5,verbose)
+	#move_piezo(pidll,ID,axis,0,verbose)
 	
 	check_for_errors(pidll,ID,verbose)
-	query_position(pidll,ID,axis,verbose)
-	pidll.E7XX_CloseConnection(ID)
+	#query_position(pidll,ID,axis,verbose)
+	
+	
+
+	# Create a TCP/IP socket
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+	# Bind the socket to the port
+	server_address = ('0.0.0.0', 5000)
+	print('Starting up on {} port {}'.format(*server_address))
+	sock.bind(server_address)
+
+	# Listen for incoming connections
+	sock.listen(1)
+
+	while True:
+		# Wait for a connection
+		print('waiting for a connection')
+		connection, client_address = sock.accept()
+		try:
+		   print('connection from', client_address)
+		   while True:
+		   	data = connection.recv(64)
+		   	
+		   	#print('received {!r}'.format(data))
+		   	if data:
+		   		jsondata = json.loads(data.decode())
+		   		if jsondata['action'] == 'zmove_only':
+		   			#print('postomove',float(jsondata['value']))
+		   			move_piezo(pidll,ID,axis,float(jsondata['value']),verbose)
+		   			check_for_errors(pidll,ID,verbose)
+			   		jsonreturn = json.dumps({'action':'report','value':'moved'}).encode()
+		   			connection.sendall(jsonreturn)
+		   		if jsondata['action'] == 'zmove':
+		   			#print('postomove',float(jsondata['value']))
+		   			move_piezo(pidll,ID,axis,float(jsondata['value']),verbose)
+		   			check_for_errors(pidll,ID,verbose)
+			   		#print('sending data back to the client')
+			   		q_pos = query_position(pidll,ID,axis,verbose)
+			   		#print('qpos',q_pos)
+			   		jsonreturn = json.dumps({'action':'report','value':str(q_pos)}).encode()
+		   			connection.sendall(jsonreturn)
+		   		if jsondata['action'] == 'qpos':
+		   			q_pos = query_position(pidll,ID,axis,verbose)
+			   		jsonreturn = json.dumps({'action':'report','value':str(q_pos)}).encode()
+		   			connection.sendall(jsonreturn)
+		   		if jsondata['action'] == 'close':
+		   			pidll.E7XX_CloseConnection(ID)
+		   			jsonreturn = json.dumps({'action':'report','value':"closed"}).encode()
+		   			connection.sendall(jsonreturn)
+		   			exit()
+		   	else:
+			   	print('no data from', client_address)
+			   	break
+		finally:
+		   # Clean up the connection
+		   print("Closing current connection")
+		   connection.close()
+
