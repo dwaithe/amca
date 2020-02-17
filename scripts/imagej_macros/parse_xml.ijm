@@ -20,16 +20,18 @@
 //info_path = "/Users/dwaithe/Documents/collaborators/WaitheD/micro_vision/Faster-RCNN-TensorFlow-Python3.5/data/fibroblast_nucleopore_class/2018/Annotations/0"+i+".xml";
 //img_dir   = "/Users/dwaithe/Documents/collaborators/WaitheD/micro_vision/Faster-RCNN-TensorFlow-Python3.5/data/fibroblast_nucleopore_class/2018/JPEGImages/";
 //print(info_path);
-for(i=107614;i<107615;i++){
-info_path ="/Users/dwaithe/Documents/collaborators/WaitheD/micro_vision/Faster-RCNN-TensorFlow-Python3.5/data/hek_peroxisome_class/2018/Annotations/"+i+".xml";
-img_dir = "/Users/dwaithe/Documents/collaborators/WaitheD/micro_vision/Faster-RCNN-TensorFlow-Python3.5/data/hek_peroxisome_class/2018/JPEGImages/";
-info_string = File.openAsString(info_path);
+//for(i=107614;i<107615;i++){
+info_path ="/Users/dwaithe/Documents/collaborators/WaitheD/micro_vision/Faster-RCNN-TensorFlow-Python3.5/data/erythroid_dapi_class/2019/Annotations/";
+img_dir = "/Users/dwaithe/Documents/collaborators/WaitheD/micro_vision/Faster-RCNN-TensorFlow-Python3.5/data/erythroid_dapi_class/2019/JPEGImages/";
+
+filename = "164468";//substring(info_string,stt+10,end);
+info_string = File.openAsString(info_path+filename+".xml");
 roiManager("Reset");
 //run("Close All");
 stt = indexOf(info_string, "<filename>");
 end = indexOf(info_string, "</filename>");
-filename = substring(info_string,stt+10,end);
-open(img_dir+filename);
+
+open(img_dir+filename+".jpg");
 
 for(obj=0;obj<500;obj++){
 stto = indexOf(info_string, "<object>",stt);
@@ -54,7 +56,7 @@ stt = indexOf(info_string, "<ymax>",stto);
 end = indexOf(info_string, "</ymax>",stto);
 ymax = parseFloat(substring(info_string,stt+6,end));
 
-makeRectangle(xmin-1, ymin-1, xmax-xmin, ymax-ymin);
+makeRectangle(xmin-1, ymin-1, xmax-xmin-1, ymax-ymin-1);
 roiManager("Add");
 roiManager("select",roiManager("count")-1);
 roiManager("rename", name)
@@ -63,4 +65,4 @@ setColor(255,255,255);
 print(name,xmin,xmax,ymin,ymax);
 //roiManager("Save", "/Users/dwaithe/Documents/collaborators/WaitheD/Faster-RCNN-TensorFlow-Python3.5/data/nucleopore_class/2018/zips/0"+i+".zip");
 stt = end;
-}}
+}
