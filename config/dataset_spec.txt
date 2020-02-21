@@ -119,6 +119,13 @@ training_images=51
 testing_images=50
 cell_class="cell - erythroid dapi"
 
+#COS-7 cells class, Nuclear pore complexes: Anti-Nup with Alexa Fluor 555 F(ab')2
+dataset=17
+dir="cos7_nucleopore_class/2019/"
+training_images=50
+testing_images=50
+cell_class="cell - cos7 nucleopore"
+
 
 
 
