@@ -126,6 +126,27 @@ training_images=50
 testing_images=50
 cell_class="cell - cos7 nucleopore"
 
+#COS-7 cells class, Nuclear pore complexes: Anti-Nup with Alexa Fluor 555 F(ab')2 1x scale (double normal)
+dataset=18
+dir="cos7_nucleopore_scale_1p0_class/2019/"
+training_images=50
+testing_images=50
+cell_class="cell - cos7 nucleopore"
+
+#COS-7 cells class, Nuclear pore complexes: Anti-Nup with Alexa Fluor 555 F(ab')2 0.25x scale (double normal)
+dataset=19
+dir="cos7_nucleopore_scale_0p25_class/2019/"
+training_images=50
+testing_images=50
+cell_class="cell - cos7 nucleopore"
+
+#COS-7 cells class, Nuclear pore complexes: Anti-Nup with Alexa Fluor 555 F(ab')2 0.1x scale (double normal)
+dataset=20
+dir="cos7_nucleopore_scale_0p1_class/2019/"
+training_images=50
+testing_images=50
+cell_class="cell - cos7 nucleopore"
+
 
 
 
