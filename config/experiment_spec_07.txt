@@ -4,15 +4,15 @@
 ### It can be parsed by run_bulk_exp.py tuned for darknet, Faster-RCNN and YOLOv2v3
 ### If not training, keep "train_on_dataset= " blank."" 
 
-out_file_log="cos7_nuc_pore."
+out_file_log="cos7_nuc_pore_scale"
 
 start #hek peroxisome  cells.
 faster_rcnn_model_init=""
-darknet2_model_init="darknet19_448.conv.23"
+darknet2_model_init="/scratch/dwaithe/models/darknet/yolov2_dk3AB-classes-1-flip_final.weights"
 darknet3_model_init="darknet53.conv.74"
 retinanet_model_init=""
-train_on_dataset="dataset17"
+train_on_dataset=""
 classes=1
 flip_on=True
-test_on_dataset="dataset17"
-number_of_repetitions=3
+test_on_dataset="dataset17,dataset18,dataset19,dataset20"
+number_of_repetitions=1
