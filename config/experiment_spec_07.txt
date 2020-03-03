@@ -8,7 +8,7 @@ out_file_log="cos7_nuc_pore_scale"
 
 start #hek peroxisome  cells.
 faster_rcnn_model_init=""
-darknet2_model_init="/scratch/dwaithe/models/darknet/yolov2_dk3AB-classes-1-flip_final.weights"
+darknet2_model_init="/scratch/dwaithe/models/darknet/cos7_nucleopore_class50/yolov2_dk3AB-classes-1-flip_final.weights"
 darknet3_model_init="darknet53.conv.74"
 retinanet_model_init=""
 train_on_dataset=""
