@@ -147,7 +147,47 @@ training_images=50
 testing_images=50
 cell_class="cell - cos7 nucleopore"
 
+#C127 dapi class, full data:
+dataset=21
+dir="c127_dapi_scale_1p0_class/2018/"
+training_images=30
+testing_images=30
+cell_class="cell - c127 dapi"
 
+#C127 dapi class, full data:
+dataset=22
+dir="c127_dapi_scale_0p25_class/2018/"
+training_images=30
+testing_images=30
+cell_class="cell - c127 dapi"
+
+#C127 dapi class, full data:
+dataset=23
+dir="c127_dapi_scale_0p1_class/2018/"
+training_images=30
+testing_images=30
+cell_class="cell - c127 dapi"
+
+Erythroid dapi class, full data, all the cells blebby and not:
+dataset=24
+dir="erythroid_dapi_all_scale_1p0_class/2019/"
+training_images=51
+testing_images=50
+cell_class="cell - erythroid dapi all"
+
+Erythroid dapi class, full data, all the cells blebby and not:
+dataset=25
+dir="erythroid_dapi_all_scale_0p1_class/2019/"
+training_images=51
+testing_images=50
+cell_class="cell - erythroid dapi all"
+
+Erythroid dapi class, full data, all the cells blebby and not:
+dataset=26
+dir="erythroid_dapi_all_scale_0p25_class/2019/"
+training_images=51
+testing_images=50
+cell_class="cell - erythroid dapi all"
 
 
 
