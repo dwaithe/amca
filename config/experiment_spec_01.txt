@@ -8,8 +8,8 @@ out_file_log="dk3AB_yolov3_test"
 
 start #The original six class comparison with homo classes.
 faster_rcnn_model_init=""
-darknet2_model_init="/home/molimm2/dwaithe/object_detection/darknet2/darknet/darknet19_448.conv.23"
-darknet3_model_init="/home/molimm2/dwaithe/object_detection/darknet3/darknet/darknet53.conv.74"
+darknet2_model_init="darknet19_448.conv.23"
+darknet3_model_init="darknet53.conv.74"
 retinanet_model_init=""
 train_on_dataset="mixed01"
 classes=1 #This is important, we train on mixed dataset but effectively train just one class.
@@ -20,8 +20,8 @@ number_of_repetitions=3
 
 start #The original six class comparison with hetero classes.
 faster_rcnn_model_init=""
-darknet2_model_init="/home/molimm2/dwaithe/object_detection/darknet2/darknet/darknet19_448.conv.23"
-darknet3_model_init="/home/molimm2/dwaithe/object_detection/darknet3/darknet/darknet53.conv.74"
+darknet2_model_init="darknet19_448.conv.23"
+darknet3_model_init="darknet53.conv.74"
 retinanet_model_init=""
 train_on_dataset="mixed00"
 classes=6 #This is important, we train on mixed dataset.
@@ -29,10 +29,10 @@ flip_on=True
 test_on_dataset="mixed00"
 number_of_repetitions=3
 
-start #The original six class comparison with homo classes.
+#start #The original six class comparison with homo classes.
 faster_rcnn_model_init=""
-darknet2_model_init="/home/molimm2/dwaithe/object_detection/darknet2/darknet/darknet19_448.conv.23"
-darknet3_model_init="/home/molimm2/dwaithe/object_detection/darknet3/darknet/darknet53.conv.74"
+darknet2_model_init="darknet19_448.conv.23"
+darknet3_model_init="darknet53.conv.74"
 retinanet_model_init=""
 train_on_dataset="mixed01"
 classes=1 #This is important, we train on mixed dataset but effectively train just one class.
@@ -41,10 +41,10 @@ test_on_dataset="dataset0,dataset8,dataset10,dataset11,dataset12,dataset14"
 number_of_repetitions=3
 
 
-start #The original six class comparison with hetero classes.
+#start #The original six class comparison with hetero classes.
 faster_rcnn_model_init=""
-darknet2_model_init="/home/molimm2/dwaithe/object_detection/darknet2/darknet/darknet19_448.conv.23"
-darknet3_model_init="/home/molimm2/dwaithe/object_detection/darknet3/darknet/darknet53.conv.74"
+darknet2_model_init="darknet19_448.conv.23"
+darknet3_model_init="darknet53.conv.74"
 retinanet_model_init=""
 train_on_dataset="mixed00"
 classes=6 #This is important, we train on mixed dataset.

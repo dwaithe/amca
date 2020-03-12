@@ -177,17 +177,19 @@ cell_class="cell - erythroid dapi all"
 
 Erythroid dapi class, full data, all the cells blebby and not:
 dataset=25
-dir="erythroid_dapi_all_scale_0p1_class/2019/"
+dir="erythroid_dapi_all_scale_0p25_class/2019/"
 training_images=51
 testing_images=50
 cell_class="cell - erythroid dapi all"
 
 Erythroid dapi class, full data, all the cells blebby and not:
 dataset=26
-dir="erythroid_dapi_all_scale_0p25_class/2019/"
+dir="erythroid_dapi_all_scale_0p1_class/2019/"
 training_images=51
 testing_images=50
 cell_class="cell - erythroid dapi all"
+
+
 
 
 
