@@ -6,7 +6,7 @@
 
 out_file_log="allversushek_ethryroid_datasets"
 
-start #hek peroxisome  cells.
+#start #hek peroxisome  cells.
 faster_rcnn_model_init=""
 darknet2_model_init="darknet19_448.conv.23"
 darknet3_model_init="darknet53.conv.74"
@@ -30,7 +30,7 @@ test_on_dataset="dataset14"
 number_of_repetitions=3
 
 
-#start #Erythroid dataset all the cells.
+start #Erythroid dataset all the cells.
 faster_rcnn_model_init=""
 darknet2_model_init="darknet19_448.conv.23"
 darknet3_model_init="darknet53.conv.74"
@@ -42,7 +42,7 @@ test_on_dataset="dataset15"
 number_of_repetitions=3
 
 
-#start #Erythroid dataset only the healthy non-blobby the cells.
+start #Erythroid dataset only the healthy non-blobby the cells.
 faster_rcnn_model_init=""
 darknet2_model_init="darknet19_448.conv.23"
 darknet3_model_init="darknet53.conv.74"
