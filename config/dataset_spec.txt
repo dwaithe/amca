@@ -203,6 +203,20 @@ training_images=0
 testing_images=11
 cell_class="cell - cos7 nucleopore"
 
+#COS-7 cells class, Nuclear pore complexes: Anti-Nup with Alexa Fluor 555 F(ab')2 10x magnificatin but resized and cropped.
+dataset=29
+dir="cos7_nucleopore_scale_6p15_10x_class/2019/"
+training_images=0
+testing_images=19
+cell_class="cell - cos7 nucleopore"
+
+#COS-7 cells class, Nuclear pore complexes: Anti-Nup with Alexa Fluor 555 F(ab')2 40x magnificatin but resized and cropped.
+dataset=30
+dir="cos7_nucleopore_scale_1p5_40x_class/2019/"
+training_images=0
+testing_images=11
+cell_class="cell - cos7 nucleopore"
+
 
 
 
