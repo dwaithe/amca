@@ -1,15 +1,19 @@
-# amca
+# AMCA - Automated Microscopy Control Environment.
 This is a repository for the Automated Microscopy Control Environment.
 
 There is a biorxiv paper associated with the development of this package. This can be found here:
 https://www.biorxiv.org/content/10.1101/544833v2
 
-We run the system using a Nvidia Jetson TX2 development board and use a LattePanda development board to support the control of our microscope. The system would also be compatible with the Nivida Jetson Nano and Javier ranges of computers. If you have access to Python drivers for your hardware then please make sure they are compiled to run on aarch64 Linux if you use the Jetson system. If drivers are only available for Windows 64-bit then you can use a LattePanda system to accommodate these drivers and communicate with the Jetson via Python sockets. A full .pdf guide for this is coming soon. Unless
+We run the system using a Nvidia Jetson TX2 development board and use a LattePanda development board to support the control of our microscope. The system would also be compatible with the Nivida Jetson Nano and Javier ranges of computers. If you have access to Python drivers for your hardware then please make sure they are compiled to run on aarch64 Linux, if you use the Jetson system. If drivers are only available for Windows 64-bit then you can use a LattePanda system to accommodate these drivers and communicate with the Jetson via Python sockets. A full '.pdf' guide for this is coming soon. Unless you use exactly the same configuration then some changes will be needed to the scripts to ensure they work with your hardware and computer systems. 
 
-### Hardware requirements
-- microscope camera. we used a 
-
-### Requirements
+### Hardware requirements. 
+- A microscope camera. We use a Photometrics Prime sCMOS camera.  
+- An automated XY microscope stage. We used an ASI automated XY stage.  
+- An automated Z-piezo (or a XYZ stage). We used a PI Piezo (P-733 2CL).  
+- Light-source. We used a CoolLED Ultra pe300 LED light source.  
+- An optical microscope. We used a Olympus IX73 microscope with a 100X UPlanSApo, NA 1.4 objective.
+.
+### Requirements. 
 To make use of this repository some other repositories are required. Please download or clone these repositories into the same root folder as AMCA is situated.  You will also need to follow the installation instructions of this different algorithms we require some compilation steps.
 Please download one of the following object detection algorithms:  
 - YOLOv2 - adapted for microscopy https://github.com/dwaithe/darknet3AB (recommended)
@@ -17,7 +21,7 @@ Please download one of the following object detection algorithms:
 - YOLOv3 - adapted for microscopy https://github.com/dwaithe/darknet3AB (same location as YOLOv2)
 - RetinaNet - adapted for microscopy https://github.com/dwaithe/keras-retinanet (optional)
 
-### Scripts for annotation and dataset generation
+### Scripts for annotation and dataset generation. 
 To train the system for your own use please use the scripts contained within the scripts subdirectory. You will find many of the python and ImageJ/FIJI scripts that I used to make this process easier. To create annotations, single channel 2-D images should be acquired at an appropriate optical and digital resolution for your application. Annotations may either be created using the FIJI/ImageJ software [1] or through using an OMERO instance and the webclient [2].
 #### For Fiji/ImageJ the process is as follows:  
 - The user should open an image, any bioformats compatible microscopy iamge format is fine.  
@@ -35,7 +39,7 @@ To train the system for your own use please use the scripts contained within the
 - Repeat for all images in a dataset.
 
 
-### Creating training datasets:
+### Creating training datasets.   
 Python scripts are written in Python 3.5+. If you are new to Python I recommend you install an environment like [Anaconda](https://www.anaconda.com/distribution/) which has everything pre-installed (select the Python 3.# version).
 This notebook allows you to import 2-D tiff files with annotation and create JPEG images and XML data corresponding to the annotations:  
 [dset01_create_anno_from_TIFF.ipynb](https://github.com/dwaithe/amca/blob/master/scripts/dset01_create_anno_from_TIFF.ipynb).  
@@ -79,10 +83,10 @@ weight_path = "../../models/darknet/c127_dapi_class30/yolov2_dk3AB-classes-1-no-
 ```
 - Now run Python 'amca.py' and watch your microscope automatically recognise and acquire image stacks in the positions outlined in the positions file.
 
-### Using AMCA to automate microsopy.
+### Post acquisition. 
+The AMCA system will generate a ImageJ TIFF stack in each position that the microscope visited and found cells. The ROI of the cells are embedded into each file. These ROI can be accessed through the metadata of the file in Python using the (library)['https://github.com/dwaithe/ijpython_roi'], or can be viewed directly in ImageJ/Fiji simply by opening the file. 
 
-
-### Augmented Reality Microscope schematic and instructions
+### Augmented Reality Microscope schematic and instructions. 
 For this project we developed an attachment to our Olympus IX73 microscope which meant it could be used for Augmented Reality.
 This can be activated during the 'amca.py' acquisiton or using the 'review_on_micro.py' subsequently.
 
