@@ -84,7 +84,7 @@ weight_path = "../../models/darknet/c127_dapi_class30/yolov2_dk3AB-classes-1-no-
 - Now run Python 'amca.py' and watch your microscope automatically recognise and acquire image stacks in the positions outlined in the positions file. Extensive metadata from the experiment is embedded into each of the output TIFF files.
 
 ### Post acquisition. 
-The AMCA system will generate a ImageJ TIFF stack in each position that the microscope visited and found cells. The ROI of the cells are embedded into each file. These ROI can be accessed through the metadata of the file in Python using the (library)[https://github.com/dwaithe/ijpython_roi], or can be viewed directly in ImageJ/Fiji simply by opening the file. From this point the cells can be analysed and segmented with any method, using the ROI as part of the analysis or not. 
+The AMCA system will generate a ImageJ TIFF stack in each position that the microscope visited and found cells. The ROI of the cells are embedded into each file. These ROI can be accessed through the metadata of the file in Python using the [library](https://github.com/dwaithe/ijpython_roi), or can be viewed directly in ImageJ/Fiji simply by opening the file. From this point the cells can be analysed and segmented with any method, using the ROI as part of the analysis or not. 
 
 ### Augmented Reality Microscope schematic and instructions. 
 For this project we developed an attachment to our Olympus IX73 microscope which meant it could be used for Augmented Reality.
