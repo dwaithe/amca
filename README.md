@@ -1,8 +1,14 @@
 # AMCA - Automated Microscopy Control Environment.
 This is a repository for the Automated Microscopy Control Environment.
 
-There is a biorxiv paper associated with the development of this package. This can be found here:
+There is a JCB paper associated with this technique which will be going live imminently.
+https://doi.org/10.1083/jcb.201903166
+
+There is an older biorxiv paper associated with the development of this package. This can be found here:
 https://www.biorxiv.org/content/10.1101/544833v2
+
+I presented a demo for this technique at ECCV2020. A link to that video can be found here:
+https://www.youtube.com/watch?v=i6hyzljEMBk
 
 We run the system using a Nvidia Jetson TX2 development board and use a LattePanda development board to support the control of our microscope. The system would also be compatible with the Nvidia Jetson Nano and Javier ranges of computers. If you have access to Python drivers for your hardware then please make sure they are compiled to run on aarch64 Linux, if you use the Jetson system. If drivers are only available for Windows 64-bit then you can use a LattePanda system to accommodate these drivers and communicate with the Jetson via Python sockets. A full '.pdf' guide for this is coming soon. Unless you use exactly the same configuration then some changes will be needed to the scripts to ensure they work with your hardware and computer systems. 
 
