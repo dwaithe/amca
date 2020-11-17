@@ -217,12 +217,21 @@ training_images=0
 testing_images=11
 cell_class="cell - cos7 nucleopore"
 
-#Dot to dot
+#cho cells with Lonnie Swift.
 dataset=31
-dir="dot_dot_class/2020/"
-training_images=47
-testing_images=47
-cell_class="0,1,2,3,4,5,6,7,8,9,dot,star,square,region,triangle"
+dir="cho_dapi_class/2020/"
+training_images=50
+testing_images=50
+cell_class="cell - cho dapi"
+
+#cho cells with Lonnie Swift.
+dataset=32
+dir="cho_rfp_pcna_class/2020/"
+training_images=50
+testing_images=50
+cell_class="cell - cho rfp pcna"
+
+
 
 
 
