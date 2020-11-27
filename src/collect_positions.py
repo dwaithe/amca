@@ -11,9 +11,9 @@ from getch import getch #import msvcrt on windows
 
 
 
-
+output_pos_file = '../pos_files/POS_FILE.txt'
 size_of_region = 200 #um
-step_size_z = 0.5
+step_size_z = 0.5 #um 
 
 #Initialize XY stage
 ms = MS2000(which_port='/dev/ttyUSB0', verbose=False)
@@ -25,8 +25,11 @@ coords =[]
 
 if __name__ == "__main__":
 	
-	zpi._send_command('qpos', 10.0)	
-
+	
+	qp = zpi._send_command('zmove', str(50.0))['value']
+	time.sleep(0.1)
+	print('Moved the Z-piezo: ',qp)
+	print('Please manually change the focus of microscope to that of the cells to center the Z-piezo of the microscope.')
 
 	def  OnMouseOver(event, x, y, flags, param):
 		if event == cv2.EVENT_LBUTTONDOWN:
@@ -34,12 +37,10 @@ if __name__ == "__main__":
 			
 		return "break"
 
-	
-	
 	while True:
 		key = ord(getch())
 
-		print(key)
+		#print(key)
 		if key == 56:
 			qp = float(zpi._send_command('qpos', 0.0)['value'])
 			qp = zpi._send_command('zmove', str(qp+ step_size_z))['value']
@@ -57,23 +58,23 @@ if __name__ == "__main__":
 			pos = xyz.get_position()
 			pos['z'] =float(zpi._send_command('qpos', '')['value'])
 			
-			print('position saved',pos['x'],pos['y'],pos['z'])
+			print('positions saved',pos['x'],pos['y'],pos['z'])
 			coords.append([float(pos['x']),float(pos['y']), float(pos['z'])])
-			
+		print('')	
 		if key ==  ord("q"):
 				break
 	coords.append(coords[0])
 
-			#move_piezo(pidll,ID,axis,4.5,verbose)+++++++++
+			
 	np_coords = np.array(coords)
 	
 	xy_pts,z_pts = return_points(np_coords, size_of_region,step_size_z,False)
 	
-	with open('../pos_files/POS_FILE.txt', 'w') as the_file:
+	with open(output_pos_file, 'w') as the_file:
 		
 		for x,y,z in zip(xy_pts[:,0],xy_pts[:,1],z_pts):
-			the_file.write(str(x)+'\t'+str(y)+'\t'+str(z)+'\n')
-
+			the_file.write(str(np.round(x,2))+'\t'+str(np.round(y,2))+'\t'+str(np.round(z,2))+'\n')
+	print('File written (''), proceed to acquisition.')
 	the_file.close()
 	plt.figure()
 	plt.scatter(xy_pts[:,0],xy_pts[:,1],s=(z_pts)*size_of_region)
