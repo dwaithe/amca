@@ -1,0 +1,30 @@
+### This is our experiment definition file.
+### It is parsed by quite a simple algorithm #'s are allowed, but please keep to double quotations and no spaces
+### between variable names and equal signs.
+### It can be parsed by run_bulk_exp.py tuned for darknet, Faster-RCNN and YOLOv2v3
+### If not training, keep "train_on_dataset= " blank."" 
+
+out_file_log="cho_cells" 
+
+
+#start #cho_cells_dapi
+faster_rcnn_model_init=""
+darknet2_model_init="darknet19_448.conv.23"
+darknet3_model_init="darknet53.conv.74"
+retinanet_model_init=""
+train_on_dataset="dataset31"
+classes=1
+flip_on=True
+test_on_dataset="dataset31"
+number_of_repetitions=1
+
+#cho_cells_rfp_pcna
+faster_rcnn_model_init=""
+darknet2_model_init="darknet19_448.conv.23"
+darknet3_model_init="darknet53.conv.74"
+retinanet_model_init=""
+train_on_dataset="dataset32"
+classes=1
+flip_on=True
+test_on_dataset="dataset32"
+number_of_repetitions=1

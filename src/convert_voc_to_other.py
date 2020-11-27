@@ -5,6 +5,43 @@ import os
 from numpy.random import RandomState
 import os
 from shutil import copyfile
+def write_xml(xml_path, roi_list, name_of_file, dataset_name, class_name, year, img_width,img_height,sf):
+    f = open(xml_path+'/'+str(name_of_file)+".xml" ,'w');
+    f.writelines("<annotation>\n");
+    f.writelines("\t<folder>"+dataset_name+"</folder>\n")
+    f.writelines("\t<filename>"+str(name_of_file)+".jpg</filename>\n")
+    f.writelines("\t<source>\n")
+    f.writelines("\t\t<database>The "+str(year)+" cell Database</database>\n")
+    f.writelines("\t\t<annotation>Waithe "+str(year)+"</annotation>\n")
+    f.writelines("\t\t<image>confocal</image>\n")
+    f.writelines("\t\t<omeroid></omeroid>\n")
+    f.writelines("\t</source>\n")
+    f.writelines("\t<owner>\n")
+    f.writelines("\t\t<name></name>\n")
+    f.writelines("\t</owner>\n")
+    f.writelines("\t<size>\n")
+    f.writelines("\t\t<width>"+str(img_width)+"</width>\n")
+    f.writelines("\t\t<height>"+str(img_height)+"</height>\n")
+    f.writelines("\t\t<depth>3</depth>\n")
+    f.writelines("\t</size>")
+    f.writelines("\t<segmented>0</segmented>\n")
+    for roi in roi_list:
+        x, y, width, height, roi_class_name = roi
+        if roi_class_name in class_name:
+            f.writelines("<object>\n")
+            f.writelines("<name>"+roi_class_name+"</name>\n")
+            f.writelines("<pose>Unspecified</pose>\n")
+            f.writelines("<truncated>0</truncated>\n")
+            f.writelines("<difficult>0</difficult>\n")
+            f.writelines("<bndbox>\n")
+            f.writelines("\t\t<xmin>"+str(round(x*sf)+1)+"</xmin>\n")
+            f.writelines("\t\t<ymin>"+str(round(y*sf)+1)+"</ymin>\n")
+            f.writelines("\t\t<xmax>"+str(round(x*sf+width*sf)+1)+"</xmax>\n")
+            f.writelines("\t\t<ymax>"+str(round(y*sf+height*sf)+1)+"</ymax>\n")
+            f.writelines("\t</bndbox>\n")
+            f.writelines("\t</object>\n")
+    f.writelines("</annotation>\n")
+    f.close()
 def create_retinaNet_single(datasets,datasets_size,path,path_on_server):
     
     
@@ -213,6 +250,7 @@ def generate_global_list(number_to_include, directory,outF1,outF2):
     
     print("train_n"+str(int(number_to_include[0]))+".txt")
     print("test_n"+str(int(number_to_include[1]))+".txt")
+
 
 def generate_random_list(number_to_include, directory):
     store_lines = []

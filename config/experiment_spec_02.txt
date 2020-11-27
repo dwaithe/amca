@@ -9,7 +9,7 @@ out_file_log="single_datasets_dk3_flip"
 
 start #neuroblastoma 180
 faster_rcnn_model_init=""
-darknet2_model_init="/home/molimm2/dwaithe/object_detection/darknet2/darknet/darknet19_448.conv.23"
+darknet2_model_init="darknet19_448.conv.23"
 darknet3_model_init="darknet53.conv.74"
 retinanet_model_init=""
 train_on_dataset="dataset0"
@@ -20,7 +20,7 @@ number_of_repetitions=3
 
 start #Erythroblast dapi class
 faster_rcnn_model_init=""
-darknet2_model_init="/home/molimm2/dwaithe/object_detection/darknet2/darknet/darknet19_448.conv.23"
+darknet2_model_init="darknet19_448.conv.23"
 darknet3_model_init="darknet53.conv.74"
 retinanet_model_init=""
 train_on_dataset="dataset8"
@@ -31,7 +31,7 @@ number_of_repetitions=3
 
 start #C127 dapi class
 faster_rcnn_model_init=""
-darknet2_model_init="/home/molimm2/dwaithe/object_detection/darknet2/darknet/darknet19_448.conv.23"
+darknet2_model_init="darknet19_448.conv.23"
 darknet3_model_init="darknet53.conv.74"
 retinanet_model_init=""
 train_on_dataset="dataset10"
@@ -40,9 +40,9 @@ flip_on=True
 test_on_dataset="dataset10"
 number_of_repetitions=3
 
-start #Eukaryote dapi class
+#start #Eukaryote dapi class
 faster_rcnn_model_init=""
-darknet2_model_init="/home/molimm2/dwaithe/object_detection/darknet2/darknet/darknet19_448.conv.23"
+darknet2_model_init="darknet19_448.conv.23"
 darknet3_model_init="darknet53.conv.74"
 retinanet_model_init=""
 train_on_dataset="dataset11"
@@ -51,9 +51,9 @@ flip_on=True
 test_on_dataset="dataset11"
 number_of_repetitions=3
 
-start #Fibroblast nucleopore class
+#start #Fibroblast nucleopore class
 faster_rcnn_model_init=""
-darknet2_model_init="/home/molimm2/dwaithe/object_detection/darknet2/darknet/darknet19_448.conv.23"
+darknet2_model_init="darknet19_448.conv.23"
 darknet3_model_init="darknet53.conv.74"
 retinanet_model_init=""
 train_on_dataset="dataset12"
@@ -62,9 +62,9 @@ flip_on=True
 test_on_dataset="dataset12"
 number_of_repetitions=3
 
-start #Hek peroxisome class, full data:
+#start #Hek peroxisome class, full data:
 faster_rcnn_model_init=""
-darknet2_model_init="/home/molimm2/dwaithe/object_detection/darknet2/darknet/darknet19_448.conv.23"
+darknet2_model_init="darknet19_448.conv.23"
 darknet3_model_init="darknet53.conv.74"
 retinanet_model_init=""
 train_on_dataset="dataset14"

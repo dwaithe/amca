@@ -1,0 +1,41 @@
+### This is our experiment definition file.
+### It is parsed by quite a simple algorithm #'s are allowed, but please keep to double quotations and no spaces
+### between variable names and equal signs.
+### It can be parsed by run_bulk_exp.py tuned for darknet, Faster-RCNN and YOLOv2v3
+### If not training, keep "train_on_dataset= " blank."" 
+
+out_file_log="scale_experiment_log"
+
+start #cos7_nuc_pore_scale.
+faster_rcnn_model_init=""
+darknet2_model_init="/scratch/dwaithe/models/darknet/cos7_nucleopore_class50/yolov2_dk3AB-classes-1-flip_final.weights"
+darknet3_model_init="darknet53.conv.74"
+retinanet_model_init=""
+train_on_dataset=""
+classes=1
+flip_on=True
+test_on_dataset="dataset17,dataset18,dataset19,dataset20,dataset27,dataset28,dataset29,dataset30"
+number_of_repetitions=1
+
+
+start #c127_dapi_scale.
+faster_rcnn_model_init=""
+darknet2_model_init="/scratch/dwaithe/models/darknet/c127_dapi_class30/yolov2_dk3AB-classes-1-flip_final.weights"
+darknet3_model_init="darknet53.conv.74"
+retinanet_model_init=""
+train_on_dataset=""
+classes=1
+flip_on=True
+test_on_dataset="dataset10,dataset21,dataset22,dataset23"
+number_of_repetitions=1
+
+start #erythroid_dapi_all_scale.
+faster_rcnn_model_init=""
+darknet2_model_init="/scratch/dwaithe/models/darknet/erythroid_dapi_all_class51/yolov2_dk3AB-classes-1-flip_final.weights"
+darknet3_model_init="darknet53.conv.74"
+retinanet_model_init=""
+train_on_dataset=""
+classes=1
+flip_on=True
+test_on_dataset="dataset15,dataset24,dataset25,dataset26"
+number_of_repetitions=1
