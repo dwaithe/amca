@@ -1,6 +1,6 @@
 ch_to_image = 2 #Number of channels.
 excitation_lines = ['1V','3GYR']#['1V','2B','3GYR']
-exposures = [50, 300] ##Remember to coordinate with order in lamp.
+exposures = [50, 100] ##Remember to coordinate with order in lamp.
 ###The number of channels to analyze.
 ch_to_analyze = 1 ##Will always take first from available. Number not index.
 ###The number of channels to save.
@@ -23,7 +23,7 @@ z_stage_move = 0.5 #um
 ###Visualization.
 display_out = False
 ###Input and output.
-out_path = "/media/nvidia/DOXIE_SD/0004/"
+out_path = "/media/nvidia/Dominic/0005/"
 save_out = "ij_tiff" #"ij_tiff" or "ome_tiff"
 positions_file_path = "../pos_files/POS_FILE.txt"
 output_positions_name = "/file_pos_export.txt"
