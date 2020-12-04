@@ -12,9 +12,11 @@ from getch import getch #import msvcrt on windows
 
 
 output_pos_file = '../pos_files/POS_FILE.txt'
-size_of_region = 200 #um
+size_of_region = 133 #um
 step_size_z = 0.5 #um 
-
+sarea_w = [8000.,0.,-8000.,0] #um
+sarea_h = [0.,8000.,0.,-8000.] #um
+sindex = 0
 #Initialize XY stage
 ms = MS2000(which_port='/dev/ttyUSB0', verbose=False)
 xyz = XYZStage(ms2000_obj=ms, axes=('X', 'y'),verbose=False)
@@ -47,7 +49,7 @@ if __name__ == "__main__":
 			time.sleep(0.1)
 			print('moved up to: ',qp)
 		if key == 50:
-			
+			sindex
 			qp = float(zpi._send_command('qpos', '')['value'])
 			qp = zpi._send_command('zmove', str(qp- step_size_z))['value']
 			time.sleep(0.1)
@@ -60,8 +62,12 @@ if __name__ == "__main__":
 			
 			print('positions saved',pos['x'],pos['y'],pos['z'])
 			coords.append([float(pos['x']),float(pos['y']), float(pos['z'])])
+			xyz.move(x_um = coords[-1][0]+sarea_w[sindex], y_um = coords[-1][1]+sarea_h[sindex], blocking=False)
+			sindex +=1
+			
 		print('')	
 		if key ==  ord("q"):
+				#zpi._send_command('close', '')
 				break
 	coords.append(coords[0])
 
@@ -70,6 +76,14 @@ if __name__ == "__main__":
 	
 	xy_pts,z_pts = return_points(np_coords, size_of_region,step_size_z,False)
 	
+	#random sampling.
+	random_locations = 200
+	locs = np.random.choice(xy_pts.shape[0],random_locations,replace=False)
+	locs = np.sort(locs)
+	xy_pts = xy_pts[locs,:]
+	zp_ts = z_pts[locs]
+	
+	
 	with open(output_pos_file, 'w') as the_file:
 		
 		for x,y,z in zip(xy_pts[:,0],xy_pts[:,1],z_pts):
@@ -77,13 +91,20 @@ if __name__ == "__main__":
 	print('File written (''), proceed to acquisition.')
 	the_file.close()
 	plt.figure()
-	plt.scatter(xy_pts[:,0],xy_pts[:,1],s=(z_pts)*size_of_region)
+	plt.scatter(xy_pts[:,0],xy_pts[:,1],marker='s')
+	plt.scatter(xy_pts[0,0],xy_pts[0,1],c='g',marker='s')
 	plt.plot(xy_pts[:,0],xy_pts[:,1],'r-')
-	plt.scatter(np_coords[:,0],np_coords[:,1],s=np_coords[:,2]*138.)
+	for x,y in zip(xy_pts[:,0],xy_pts[:,1]):
+		rsz = size_of_region//2
+		xrect = [x-rsz,x+rsz,x+rsz,x-rsz,x-rsz]
+		yrect = [y-rsz, y-rsz, y+rsz, y+rsz,y-rsz]
+		plt.plot(xrect,yrect,'b-')
+	#plt.scatter(np_coords[:,0],np_coords[:,1],s=np_coords[:,2])
+	plt.axis('equal')
 
 	#plt.xlim(-0.1,1.1)
 	#plt.ylim(-0.1,1.1)
 	plt.show()
 
-zpi._send_command('close', '')
+
 	

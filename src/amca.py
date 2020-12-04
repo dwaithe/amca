@@ -481,11 +481,24 @@ if __name__ == '__main__':
 		
 		t1 = time.time()
 		if d.ch_to_image >= 1:
-			frame_CH1 = d.cam_aquire(d.exposures[0],None)[::spa_sam,::spa_sam]			
+			CH1 = d.cam_aquire(d.exposures[0],None)
+			frame_CH1 = CH1[0::spa_sam,0::spa_sam]
+			frame_CH1 += CH1[0::spa_sam,1::spa_sam]
+			frame_CH1 += CH1[1::spa_sam,0::spa_sam]
+			frame_CH1 += CH1[1::spa_sam,1::spa_sam]		
+							
 		if d.ch_to_image >= 2:
-			frame_CH2 = d.cam_aquire(d.exposures[1],None)[::spa_sam,::spa_sam]		
+			CH2 = d.cam_aquire(d.exposures[1],None)
+			frame_CH2 = CH2[0::spa_sam,0::spa_sam]
+			frame_CH2 += CH2[0::spa_sam,1::spa_sam]
+			frame_CH2 += CH2[1::spa_sam,0::spa_sam]
+			frame_CH2 += CH2[1::spa_sam,1::spa_sam]	
 		if d.ch_to_image >= 3:
-			frame_CH3 = d.cam_aquire(d.exposures[2],None)[::spa_sam,::spa_sam]	
+			CH3 = d.cam_aquire(d.exposures[2],None)
+			frame_CH3 = CH3[0::spa_sam,0::spa_sam]
+			frame_CH3 += CH3[0::spa_sam,1::spa_sam]
+			frame_CH3 += CH3[1::spa_sam,0::spa_sam]
+			frame_CH3 += CH3[1::spa_sam,1::spa_sam]	
 		
 		
 		assert d.lim_max_x == frame_CH1.shape[1], ('unusual x dimension', frame_CH1.shape[1])
