@@ -2,7 +2,7 @@ from pyvcam import pvc
 from pyvcam.camera import Camera
 import matplotlib.pylab as plt
 from matplotlib.colors import LinearSegmentedColormap
-
+import tifffile as tifffile
 import numpy as np
 import time
 ###
@@ -54,18 +54,36 @@ plt.register_cmap(cmap=green1)
 def main():
     # Initialize PVCAM and find the first available camera.
     pvc.init_pvcam()
+    
     cam = [cam for cam in Camera.detect_camera()][0]
     cam.open()
     cam.gain = 1
     cam.exp_mode ="Timed"
+    cam.binning = 2 #Binning to set camera to collect at
     #cam.update_mode()
     cam.exp_out_mode = 0
     #cam.speed_table_index = 0
     #With the CoolLED pE-300 Ultra in sequence mode, this will cycle through the 3 lamps.
     t0 = time.time()
-    frame1= cam.get_frame(exp_time=500) #Exposure channel 1
-    frame2= cam.get_frame(exp_time=1000) #Exposure channel 2
-    frame3= cam.get_frame(exp_time=500) #Exposure channel 3
+    frame1= cam.get_frame(exp_time=50) #Exposure channel 1
+    frame2= cam.get_frame(exp_time=10) #Exposure channel 2
+    frame3= cam.get_frame(exp_time=300) #Exposure channel 3
+    im_stk = np.zeros((3,frame1.shape[0],frame2.shape[1]))
+    im_stk[0,:,:] = frame1
+    im_stk[1,:,:] = frame2
+    im_stk[2,:,:] = frame3
+    
+    
+    out_file_path = "../../../Desktop/2020_11_13_training_imgs/"
+    from os import listdir
+    from os.path import isfile, join
+    onlyfiles = [f for f in listdir(out_file_path) if isfile(join(out_file_path, f))]
+    leng =  onlyfiles.__len__()
+    lenstr = str(leng+1).zfill(5)
+    
+    
+    tifffile.imsave(out_file_path+'pos'+lenstr+'.tif', im_stk.astype(np.uint16),  imagej=True)
+	
     t1 = time.time()
     print(np.round(t1-t0,3),"s to acquire")
     cam.close()
