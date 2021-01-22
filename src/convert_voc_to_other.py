@@ -5,7 +5,7 @@ import os
 from numpy.random import RandomState
 import os
 from shutil import copyfile
-def write_xml(xml_path, roi_list, name_of_file, dataset_name, class_name, year, img_width,img_height,sf):
+def write_xml(xml_path, roi_list, name_of_file, dataset_name, class_name, override, year, img_width,img_height,sf):
     f = open(xml_path+'/'+str(name_of_file)+".xml" ,'w');
     f.writelines("<annotation>\n");
     f.writelines("\t<folder>"+dataset_name+"</folder>\n")
@@ -27,19 +27,23 @@ def write_xml(xml_path, roi_list, name_of_file, dataset_name, class_name, year, 
     f.writelines("\t<segmented>0</segmented>\n")
     for roi in roi_list:
         x, y, width, height, roi_class_name = roi
-        if roi_class_name in class_name:
-            f.writelines("<object>\n")
-            f.writelines("<name>"+roi_class_name+"</name>\n")
-            f.writelines("<pose>Unspecified</pose>\n")
-            f.writelines("<truncated>0</truncated>\n")
-            f.writelines("<difficult>0</difficult>\n")
-            f.writelines("<bndbox>\n")
-            f.writelines("\t\t<xmin>"+str(round(x*sf)+1)+"</xmin>\n")
-            f.writelines("\t\t<ymin>"+str(round(y*sf)+1)+"</ymin>\n")
-            f.writelines("\t\t<xmax>"+str(round(x*sf+width*sf)+1)+"</xmax>\n")
-            f.writelines("\t\t<ymax>"+str(round(y*sf+height*sf)+1)+"</ymax>\n")
-            f.writelines("\t</bndbox>\n")
-            f.writelines("\t</object>\n")
+        if override == True:
+            roi_class_name = class_name
+        
+
+        f.writelines("<object>\n")
+        f.writelines("<name>"+roi_class_name+"</name>\n")
+        f.writelines("<pose>Unspecified</pose>\n")
+        f.writelines("<truncated>0</truncated>\n")
+        f.writelines("<difficult>0</difficult>\n")
+        f.writelines("<bndbox>\n")
+        f.writelines("\t\t<xmin>"+str(round(x*sf)+1)+"</xmin>\n")
+        f.writelines("\t\t<ymin>"+str(round(y*sf)+1)+"</ymin>\n")
+        f.writelines("\t\t<xmax>"+str(round(x*sf+width*sf)+1)+"</xmax>\n")
+        f.writelines("\t\t<ymax>"+str(round(y*sf+height*sf)+1)+"</ymax>\n")
+        f.writelines("\t</bndbox>\n")
+        f.writelines("\t</object>\n")
+
     f.writelines("</annotation>\n")
     f.close()
 def create_retinaNet_single(datasets,datasets_size,path,path_on_server):
@@ -65,6 +69,7 @@ def create_retinaNet_single(datasets,datasets_size,path,path_on_server):
         csvfileout = open(path_dir+'retina_train_dn_n'+str(dataset_size[0])+'.csv',"w")
         
         def read_data(datain,csvfileout,fclasses):
+            im_class =""
             while 1:
                 line = datain.readline()
                 if not line:
@@ -289,9 +294,12 @@ def generate_random_list(number_to_include, directory):
     print("written to directory:", directory+"ImageSets/Main/")
 def create_YOLO_single(datasets,datasets_size,datasets_class,path,path_on_server,backup_path):
 
+
+
     #This Reads the Pascal format and converts to label format for YOLO. This is the default format, which I start from.
-    for dataset in datasets:
+    for dataset, dataset_size, dataset_class in zip(datasets, datasets_size, datasets_class):
         print(dataset)
+        dataset_comma = dataset_class.split(",")
 
         for file_nm in os.listdir(path+dataset+'Annotations/'):
             if file_nm.endswith(".xml"):       
@@ -317,9 +325,14 @@ def create_YOLO_single(datasets,datasets_size,datasets_class,path,path_on_server
                         ymax_str = data.readline()
                         ymax = float(ymax_str.split("<ymax>")[1].split("</ymax>")[0])
 
+                        class_num = dataset_comma.index(im_class)
+
 
                         xcen, ycen, widc, heic = convert_to_yolo_format(xmin,xmax,ymin,ymax,im_height,im_width)
-                        out_str +=  str(0)+" "+str(xcen)+" "+str(ycen)+" "+str(widc)+" "+str(heic)+"\n"
+                        out_str +=  str(class_num)+" "+str(xcen)+" "+str(ycen)+" "+str(widc)+" "+str(heic)+"\n"
+
+                if not os.path.exists(path+dataset+'labels/'):
+                    os.mkdir(path+dataset+'labels/')
 
                 f = open(path+dataset+'labels/'+file_nm[:-4]+'.txt',"w")
                 f.write(out_str)
@@ -358,10 +371,12 @@ def create_YOLO_single(datasets,datasets_size,datasets_class,path,path_on_server
 
 
     for dataset,dataset_size,dataset_class in zip(datasets,datasets_size,datasets_class):
+
+        dataset_comma = dataset_class.split(",")
         path_dir = path+dataset
         print (dataset)
         f = open(path_dir+'obj_'+str(dataset.split("/")[0])+str(dataset_size[0])+'.data',"w")
-        f.write("classes = 1\n")
+        f.write("classes = "+str(dataset_comma.__len__())+"\n")
         f.write("train = "+path_on_server+dataset+'train_dn_n'+str(dataset_size[0])+'.txt'+"\n")
         f.write("valid = "+path_on_server+dataset+'test_dn_n'+str(dataset_size[1])+'.txt'+"\n")
         f.write("names = "+path_on_server+dataset+'obj_'+str(dataset.split("/")[0])+'.names'+"\n")
@@ -369,7 +384,8 @@ def create_YOLO_single(datasets,datasets_size,datasets_class,path,path_on_server
         f.close()
 
         f = open(path_dir+'obj_'+str(dataset.split("/")[0])+'.names',"w")
-        f.write(dataset_class+"\n")
+        for dst in dataset_comma:
+            f.write(dst+"\n")
         f.close()
 def create_FasterRCNN_mixed_dataset(params, datasets,datasets_size,datasets_class,path,path_on_server,backup_path):
 
