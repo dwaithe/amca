@@ -136,10 +136,16 @@ class DynamicUpdate():
 		
 		d.detect_coords = []
 		for detection in detections:
-			x = (float(detection[2][0])/d.output_wid)*self.lim_max_x
-			y = (float(detection[2][1])/d.output_hei)*self.lim_max_y
-			w = (float(detection[2][2])/d.output_wid)*self.lim_max_x
-			h = (float(detection[2][3])/d.output_hei)*self.lim_max_y
+			if self.analysis_method == 'object':
+				x = (float(detection[2][0])/d.output_wid)*self.lim_max_x
+				y = (float(detection[2][1])/d.output_hei)*self.lim_max_y
+				w = (float(detection[2][2])/d.output_wid)*self.lim_max_x
+				h = (float(detection[2][3])/d.output_hei)*self.lim_max_y
+			elif(self.analysis_method == 'Crop'):
+				x = self.clim_min_x + (float(detection[2][0])/d.output_wid)*(self.clim_max_x-self.clim_min_x)
+				y = self.clim_min_y + (float(detection[2][1])/d.output_hei)*(self.clim_max_y-self.clim_min_y)
+				w = (float(detection[2][2])/d.output_wid)*(self.clim_max_x-self.clim_min_x)
+				h = (float(detection[2][3])/d.output_hei)*(self.clim_max_y-self.clim_min_y)
 			xmin = int(round(x - (w / 2)))
 			xmax = int(round(x + (w / 2)))
 			ymin = int(round(y - (h / 2)))
@@ -174,7 +180,50 @@ class DynamicUpdate():
 		xyz.move(x_um = self.stage_pos_x, y_um = self.stage_pos_y, blocking=False)
 		zpi._send_command('zmove_only',self.stage_pos_z)
 
+def imageOnlyAndMove():
 
+	
+	d.pos_index += 1				
+	lets_get_meta = []
+	_zpos = []
+	for z in d.img_stk:
+		_zpos.append(float(z))
+	_zpos.sort()
+	
+	## Numpy stack of the correct size.
+	np_stk = np.zeros((1,len(_zpos),d.ch_to_save,d.lim_max_y,d.lim_max_x)).astype(d.exp_depth)
+	z = 0				
+			
+	
+	print('len',_zpos)
+	z =0
+	for zp in _zpos:
+		for ch in range(0,d.ch_to_save):
+			np_stk[0,z,ch,:,:] = d.img_stk[zp][ch].astype(d.exp_depth)
+			
+		z +=1
+	
+	if d.save_out == "ij_tiff":
+		save_img_out.saveas_imagej_tiff(np_stk, [],d)
+	elif d.save_out == "ome_tiff":
+		save_img_out.saveas_ome_tiff(np_stk, [],d)
+			
+	d.img_stk = {}
+	
+	if d.pos_x.__len__() == d.pos_index:
+		#We are at the end of list.
+		return False 
+		
+	### What is the next movement to fulfill.	
+	d.on_move(d.pos_x[d.pos_index],d.pos_y[d.pos_index],d.pos_z[d.pos_index])
+	time.sleep(1)
+	
+		
+	return True
+
+	
+
+	
 
 
 def analyzeAndMove(detections):
@@ -199,7 +248,7 @@ def analyzeAndMove(detections):
 			d.naive = False
 			d.scanning_up = True
 			d.scanning_down = False
-			d.z_index = 1
+			d.z_index = 10
 		else:
 			#This is the first time this image is seen but there are no regions detected. so we do nothing here and skip to next location
 			d.pos_index += 1
@@ -299,6 +348,10 @@ def parse_acquisition_def(path):
 	commands['lim_max_x']= None
 	commands['lim_min_y']= None
 	commands['lim_max_y']= None
+	commands['clim_min_x']= None
+	commands['clim_max_x']= None
+	commands['clim_min_y']= None
+	commands['clim_max_y']= None
 	commands['digital_binning']= None
 	commands['cam_pixel_size']= None
 	commands['objective_mag']= None
@@ -306,6 +359,7 @@ def parse_acquisition_def(path):
 	commands['camera_type']= None
 	commands['lamp_type']= None
 	commands['microscope_type']= None
+	commands['analysis_method']= None
 	commands['z_stage_move']= None
 	
 	commands['display_out']= None
@@ -351,6 +405,10 @@ def parse_acquisition_def(path):
 				elif chunk == 'lim_max_x': commands['lim_max_x'] = int(value)
 				elif chunk == 'lim_min_y': commands['lim_min_y'] = int(value)
 				elif chunk == 'lim_max_y': commands['lim_max_y'] = int(value)
+				elif chunk == 'clim_min_x': commands['clim_min_x'] = int(value)
+				elif chunk == 'clim_max_x': commands['clim_max_x'] = int(value)
+				elif chunk == 'clim_min_y': commands['clim_min_y'] = int(value)
+				elif chunk == 'clim_max_y': commands['clim_max_y'] = int(value)
 				elif chunk == 'digital_binning': commands['digital_binning'] = int(value)
 				elif chunk == 'cam_pixel_size': commands['cam_pixel_size'] = float(value)
 				elif chunk == 'objective_mag': commands['objective_mag'] = int(value)
@@ -358,6 +416,7 @@ def parse_acquisition_def(path):
 				elif chunk == 'camera_type': commands['camera_type'] = str(value.strip('"').strip("'"))
 				elif chunk == 'lamp_type': commands['lamp_type'] = str(value.strip('"').strip("'"))
 				elif chunk == 'microscope_type': commands['microscope_type'] = str(value.strip('"').strip("'"))
+				elif chunk == 'analysis_method': commands['analysis_method'] = str(value.strip('"').strip("'"))
 				elif chunk == 'z_stage_move': commands['z_stage_move'] = float(value)
 				
 				elif chunk == 'display_out': 
@@ -416,6 +475,10 @@ if __name__ == '__main__':
 	d.lim_max_x = params['lim_max_x']#512 #expected limits
 	d.lim_min_y = params['lim_min_y']#0 #expected limits
 	d.lim_max_y = params['lim_max_y']#512 #expected limits
+	d.clim_min_x = params['clim_min_x']#0 #expected limits. Should correspond with what is coming out of camera.
+	d.clim_max_x = params['clim_max_x']#512 #expected limits
+	d.clim_min_y = params['clim_min_y']#0 #expected limits
+	d.clim_max_y = params['clim_max_y']#512 #expected limits
 	d.digital_binning = params['digital_binning']#2 #Digital binning to apply (see below).
 	d.cam_pixel_size = params['cam_pixel_size']#6.5 #um Fixed pixel size of camera
 	d.objective_mag = params['objective_mag']#100
@@ -426,6 +489,7 @@ if __name__ == '__main__':
 	d.processor_type = platform.processor()
 	d.computer_name =  socket.gethostname()
 	
+	d.analysis_method = params['analysis_method']
 	d.algorithm_link = ""
 	d.voxel_xy = (d.cam_pixel_size/d.objective_mag)*(d.digital_binning*d.cam_binning) #um
 	print('d.voxel_xy',d.voxel_xy)
@@ -446,7 +510,11 @@ if __name__ == '__main__':
 	assert d.ch_to_save <= d.ch_to_image, "please define channels to save as <= channels to image."
 	
 	d.init_camera()
-	d.dkrepo = git.Repo(params['dkrepo']).head.object.hexsha
+	if params['dkrepo'] != "":
+		d.dkrepo = git.Repo(params['dkrepo']).head.object.hexsha
+	else:
+		d.dkrepo = ""
+	
 	d.algorithm_name = params['algorithm_name']#"YOLOv2 Darknet3 "
 	d.config_path = params['config_path']#"../../darknet3AB/darknet/cfg/yolov2_dk3AB-classes-1-flip.cfg"
 	d.meta_path =  params['meta_path']#"../../cell_datasets/cho_dapi_class/2020/obj_cho_dapi_class50.data"
@@ -458,103 +526,168 @@ if __name__ == '__main__':
 	
 	
 	
-	###Loads and creates input and output files.
-	d.load_positions()
-	d.init_output_positions()
-	#Query postion of stage x and y.
-	d.on_move(d.pos_x[0],d.pos_y[0],d.pos_z[0])
-	### Loads the network in.
-	netMain = dk.load_net_custom(d.config_path.encode("ascii"), d.weight_path.encode("ascii"), 0, 1)
-	metaMain = dk.load_meta(d.meta_path.encode("ascii"))
 	
-	d.output_wid = dk.network_width(netMain)
-	d.output_hei = dk.network_height(netMain)
-	darknet_image = dk.make_image(d.output_wid,d.output_hei,3)
+	### Loads the network in.
+	if params['algorithm_name'] != "": 
+		netMain = dk.load_net_custom(d.config_path.encode("ascii"), d.weight_path.encode("ascii"), 0, 1)
+		metaMain = dk.load_meta(d.meta_path.encode("ascii"))
+		
+		d.output_wid = dk.network_width(netMain)
+		d.output_hei = dk.network_height(netMain)
+		darknet_image = dk.make_image(d.output_wid,d.output_hei,3)
 	im = np.zeros((d.lim_max_y,d.lim_max_x,3)).astype(np.uint8)
-	spa_sam = d.digital_binning #Rather than binning we are sparse sampling. Needs improving.
+	spa_sam = d.digital_binning 
 	#####The main loop. This will keep going till all the stage positions have been visited.
 	tfull = time.time()
 	t0 = time.time()
 	print("Running AMCA")
-	while True:
-		## Collect frame
-		
-		t1 = time.time()
-		if d.ch_to_image >= 1:
-			CH1 = d.cam_aquire(d.exposures[0],None)
-			frame_CH1 = CH1[0::spa_sam,0::spa_sam]
-			frame_CH1 += CH1[0::spa_sam,1::spa_sam]
-			frame_CH1 += CH1[1::spa_sam,0::spa_sam]
-			frame_CH1 += CH1[1::spa_sam,1::spa_sam]		
-							
-		if d.ch_to_image >= 2:
-			CH2 = d.cam_aquire(d.exposures[1],None)
-			frame_CH2 = CH2[0::spa_sam,0::spa_sam]
-			frame_CH2 += CH2[0::spa_sam,1::spa_sam]
-			frame_CH2 += CH2[1::spa_sam,0::spa_sam]
-			frame_CH2 += CH2[1::spa_sam,1::spa_sam]	
-		if d.ch_to_image >= 3:
-			CH3 = d.cam_aquire(d.exposures[2],None)
-			frame_CH3 = CH3[0::spa_sam,0::spa_sam]
-			frame_CH3 += CH3[0::spa_sam,1::spa_sam]
-			frame_CH3 += CH3[1::spa_sam,0::spa_sam]
-			frame_CH3 += CH3[1::spa_sam,1::spa_sam]	
-		
-		
-		assert d.lim_max_x == frame_CH1.shape[1], ('unusual x dimension', frame_CH1.shape[1])
-		assert d.lim_max_y == frame_CH1.shape[0], ('unusual y dimension', frame_CH1.shape[0])
-		t2 = time.time()
+	d.num_of_tpts = 36
+	starttime = time.time()
+	for tp in range(0,d.num_of_tpts):
 		
 		
 		
-		###Converting into RGB format for CV object detection.
-		if d.ch_to_analyze == 1:
-			frame_CH1_n = (frame_CH1/np.max(frame_CH1))*255.0		
-			im[:,:,0] = frame_CH1_n
-			im[:,:,1] = frame_CH1_n
-			im[:,:,2] = frame_CH1_n
+		##time points.
+		d.tp = tp
 		
-		elif d.ch_to_analyze == 2:
-			frame_CH1_n = (frame_CH1/np.max(frame_CH1))*255.0
-			frame_CH2_n = (frame_CH2/np.max(frame_CH2))*255.0
-			im[:,:,0] =frame_CH1_n
-			im[:,:,1] =frame_CH2_n	
-		
-		elif d.ch_to_analyze.__len__() == 3:
-			frame_CH1_n = (frame_CH1/np.max(frame_CH1))*255.0
-			frame_CH2_n = (frame_CH2/np.max(frame_CH2))*255.0
-			frame_CH3_n = (frame_CH3/np.max(frame_CH3))*255.0
-			im[:,:,0] =frame_CH1_n
-			im[:,:,1] =frame_CH2_n
-			im[:,:,2] =frame_CH3_n
-		
-		###Converted into correct dimension for darknet.	
-		frame_resized = cv2.resize(im,(dk.network_width(netMain),dk.network_height(netMain)),interpolation=cv2.INTER_LINEAR)
-		dk.copy_image_from_bytes(darknet_image,frame_resized.tobytes())
-		
-		t3 = time.time()
-		detections = dk.detect_image(netMain, metaMain, darknet_image, thresh=0.50)
-		if len(detections) > 0:
-			#Save image to stack.
-			if d.ch_to_save == 1:
-				d.img_stk[d.stage_pos_z] = [frame_CH1]
-			if d.ch_to_save == 2:
-				d.img_stk[d.stage_pos_z] = [frame_CH1,frame_CH2]
-			if d.ch_to_save == 3:
-				d.img_stk[d.stage_pos_z] = [frame_CH1,frame_CH2,frame_CH3]
-		t4 = time.time()
-		out = analyzeAndMove(detections)
-		t5 =time.time()
-		
-		timings_out ='Time (s), total: '+str(np.round(t5-t0,3))+' acquire: '+str(np.round(t2-t1,3))
-		timings_out += ' detect: '+str(np.round(t4-t3,3))+' convert: '+str(np.round(t3-t2,3))
-		timings_out += ' move: '+str(np.round(t5-t4,3))
-		print(timings_out)
-		t0 = time.time()
-		if out == False:
-			print('Session complete. Time taken (min): '+str(np.round((time.time()-tfull)/60,3)))
-			break;
-		
+		d.load_positions()
+		d.init_output_positions()
+		#Query postion of stage x and y.
+		d.on_move(d.pos_x[0],d.pos_y[0],d.pos_z[0])
+		while True:
+			## Collect frames and loops positions.
+			
+			t1 = time.time()
+			if d.ch_to_image >= 1:
+				CH1 = d.cam_aquire(d.exposures[0],None)
+				if spa_sam == 1:
+					frame_CH1 = CH1
+				else:
+					frame_CH1 = CH1[0::spa_sam,0::spa_sam]
+					frame_CH1 += CH1[0::spa_sam,1::spa_sam]
+					frame_CH1 += CH1[1::spa_sam,0::spa_sam]
+					frame_CH1 += CH1[1::spa_sam,1::spa_sam]		
+								
+			if d.ch_to_image >= 2:
+				CH2 = d.cam_aquire(d.exposures[1],None)
+				if spa_sam == 1:
+					frame_CH2 = CH2
+				else:
+					frame_CH2 = CH2[0::spa_sam,0::spa_sam]
+					frame_CH2 += CH2[0::spa_sam,1::spa_sam]
+					frame_CH2 += CH2[1::spa_sam,0::spa_sam]
+					frame_CH2 += CH2[1::spa_sam,1::spa_sam]	
+			if d.ch_to_image >= 3:
+				CH3 = d.cam_aquire(d.exposures[2],None)
+				if spa_sam == 1:
+					frame_CH3 = CH3
+				else:
+					
+					frame_CH3 = CH3[0::spa_sam,0::spa_sam]
+					frame_CH3 += CH3[0::spa_sam,1::spa_sam]
+					frame_CH3 += CH3[1::spa_sam,0::spa_sam]
+					frame_CH3 += CH3[1::spa_sam,1::spa_sam]	
+			
+			
+			assert d.lim_max_x == frame_CH1.shape[1], ('unusual x dimension', frame_CH1.shape[1])
+			assert d.lim_max_y == frame_CH1.shape[0], ('unusual y dimension', frame_CH1.shape[0])
+			t2 = time.time()
+			
+			
+			
+			###Converting into RGB format for CV object detection.
+			if d.ch_to_analyze == 1:
+				frame_CH1_n = (frame_CH1/np.max(frame_CH1))*255.0		
+				im[:,:,0] = frame_CH1_n
+				im[:,:,1] = frame_CH1_n
+				im[:,:,2] = frame_CH1_n
+			
+			elif d.ch_to_analyze == 2:
+				frame_CH1_n = (frame_CH1/np.max(frame_CH1))*255.0
+				frame_CH2_n = (frame_CH2/np.max(frame_CH2))*255.0
+				im[:,:,0] =frame_CH1_n
+				im[:,:,1] =frame_CH2_n	
+			
+			elif d.ch_to_analyze.__len__() == 3:
+				frame_CH1_n = (frame_CH1/np.max(frame_CH1))*255.0
+				frame_CH2_n = (frame_CH2/np.max(frame_CH2))*255.0
+				frame_CH3_n = (frame_CH3/np.max(frame_CH3))*255.0
+				im[:,:,0] =frame_CH1_n
+				im[:,:,1] =frame_CH2_n
+				im[:,:,2] =frame_CH3_n
+				
+			if d.analysis_method == 'object':
+				
+				###Converted into correct dimension for darknet.	
+				frame_resized = cv2.resize(im,(dk.network_width(netMain),dk.network_height(netMain)),interpolation=cv2.INTER_LINEAR)
+				dk.copy_image_from_bytes(darknet_image,frame_resized.tobytes())
+				
+				 
+				
+				t3 = time.time()
+				detections = dk.detect_image(netMain, metaMain, darknet_image, thresh=0.50)
+				if len(detections) > 0:
+					#Save image to stack.
+					if d.ch_to_save == 1:
+						d.img_stk[d.stage_pos_z] = [frame_CH1]
+					if d.ch_to_save == 2:
+						d.img_stk[d.stage_pos_z] = [frame_CH1,frame_CH2]
+					if d.ch_to_save == 3:
+						d.img_stk[d.stage_pos_z] = [frame_CH1,frame_CH2,frame_CH3]
+				t4 = time.time()
+				out = analyzeAndMove(detections)
+				t5 =time.time()
+
+			if d.analysis_method == 'None':
+				t3 = time.time()
+				#Save image to stack.
+				if d.ch_to_save == 1:
+					d.img_stk[d.stage_pos_z] = [frame_CH1]
+				if d.ch_to_save == 2:
+					d.img_stk[d.stage_pos_z] = [frame_CH1,frame_CH2]
+				if d.ch_to_save == 3:
+					d.img_stk[d.stage_pos_z] = [frame_CH1,frame_CH2,frame_CH3]
+				t4 = time.time()
+				out = imageOnlyAndMove()
+				t5 = time.time()
+			if d.analysis_method == 'Crop':
+				
+				imc = im[d.clim_min_y:d.clim_max_y,d.clim_min_x:d.clim_max_x,:]
+				
+			
+				###Converted into correct dimension for darknet.	
+				frame_resized = cv2.resize(imc,(dk.network_width(netMain),dk.network_height(netMain)),interpolation=cv2.INTER_LINEAR)
+				dk.copy_image_from_bytes(darknet_image,frame_resized.tobytes())
+				
+				t3 = time.time()
+				detections = dk.detect_image(netMain, metaMain, darknet_image, thresh=0.50)
+				print('detections',detections)
+				if len(detections) > 0:
+					#Save image to stack.
+					if d.ch_to_save == 1:
+						d.img_stk[d.stage_pos_z] = [frame_CH1]
+					if d.ch_to_save == 2:
+						d.img_stk[d.stage_pos_z] = [frame_CH1,frame_CH2]
+					if d.ch_to_save == 3:
+						d.img_stk[d.stage_pos_z] = [frame_CH1,frame_CH2,frame_CH3]
+				t4 = time.time()
+				out = analyzeAndMove(detections)
+				t5 =time.time()
+			
+				
+				
+			
+			timings_out ='Time (s), total: '+str(np.round(t5-t0,3))+' acquire: '+str(np.round(t2-t1,3))
+			timings_out += ' detect: '+str(np.round(t4-t3,3))+' convert: '+str(np.round(t3-t2,3))
+			timings_out += ' move: '+str(np.round(t5-t4,3))
+			print(timings_out)
+			t0 = time.time()
+			if out == False:
+				print('Session complete. Time taken (min): '+str(np.round((time.time()-tfull)/60,3)))
+				break;
+		print ("tick",300.0 - ((time.time() - starttime) % 300.0))
+		    
+		time.sleep(300.0 - ((time.time() - starttime) % 300.0))	
 	
 	d.cam.close()
 	pvc.uninit_pvcam()

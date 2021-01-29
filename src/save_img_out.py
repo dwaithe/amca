@@ -11,6 +11,7 @@ def saveas_imagej_tiff(im_stk, stack_rois,d):
 	lets_get_meta =[]
 	width = im_stk.shape[4]
 	height = im_stk.shape[3]
+	
 	print('Saving img stack of dims: ',im_stk.shape)
 	for regions,z in stack_rois:
 		for reg in regions:
@@ -88,11 +89,16 @@ def saveas_imagej_tiff(im_stk, stack_rois,d):
 	
 	
 	resolution = (1./d.voxel_xy,1./d.voxel_xy) #Expects tuple, ratio pixel to physical unit (for unit see 'unit').
-	out_file_path = d.out_path+"img_stk_x_"+str(d.stage_pos_x)+"y_"+str(d.stage_pos_y)+".tif"	
+	print('numoftimepts',d.num_of_tpts)
+	if d.num_of_tpts > 0:
+		stp = str(d.tp).zfill(4)
+		out_file_path = d.out_path+"img_stk_x_"+str(d.stage_pos_x)+"y_"+str(d.stage_pos_y)+"t_"+stp+".tif"
+	else:
+		out_file_path = d.out_path+"img_stk_x_"+str(d.stage_pos_x)+"y_"+str(d.stage_pos_y)+".tif"
 	
 	if not os.path.exists( d.out_path):
     		os.makedirs(d.out_path)	
-				
+
 	tifffile.imsave(out_file_path, im_stk, resolution=resolution, shape=im_stk.shape, ijmetadata={'Overlays':lets_get_meta,'info':info}, metadata=metadata, imagej=True)
 	
 	

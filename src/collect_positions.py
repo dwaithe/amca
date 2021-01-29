@@ -12,11 +12,14 @@ from getch import getch #import msvcrt on windows
 
 
 output_pos_file = '../pos_files/POS_FILE.txt'
-size_of_region = 133 #um
+size_of_region = 327 #um 133 for 100x and 655 for 20x
 step_size_z = 0.5 #um 
-sarea_w = [8000.,0.,-8000.,0] #um
-sarea_h = [0.,8000.,0.,-8000.] #um
+sarea_w = [3000.,0.,-3000.,0] #um 8000 for slide 3000 for low bead 1000 for high bead.
+sarea_h = [0.,3000.,0.,-3000.] #um
 sindex = 0
+random_sampling = True
+random_locations = 20 #How many positions to take from set if random.
+
 #Initialize XY stage
 ms = MS2000(which_port='/dev/ttyUSB0', verbose=False)
 xyz = XYZStage(ms2000_obj=ms, axes=('X', 'y'),verbose=False)
@@ -77,11 +80,11 @@ if __name__ == "__main__":
 	xy_pts,z_pts = return_points(np_coords, size_of_region,step_size_z,False)
 	
 	#random sampling.
-	random_locations = 200
-	locs = np.random.choice(xy_pts.shape[0],random_locations,replace=False)
-	locs = np.sort(locs)
-	xy_pts = xy_pts[locs,:]
-	zp_ts = z_pts[locs]
+	if random_sampling:
+		locs = np.random.choice(xy_pts.shape[0],random_locations,replace=False)
+		locs = np.sort(locs)
+		xy_pts = xy_pts[locs,:]
+		zp_ts = z_pts[locs]
 	
 	
 	with open(output_pos_file, 'w') as the_file:
