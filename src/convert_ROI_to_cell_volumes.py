@@ -271,8 +271,11 @@ class ConvertROItoCellVolumes():
         """
         for stg_x in self.x_unq:
             for stg_y in self.y_unq:
-                pathname2 ="img_stk_x_"+str(stg_x)+"y_"+str(stg_y)+"all.tiff"
+                pathname2 ="img_stk_x_"+str(stg_x)+"y_"+str(stg_y)+"t_0021.tif"
                 input_file = self.filepath+self.subfolder_for_images+pathname2
+
+
+
                 output_file = outpath+pathname2
                 #for ref in ref_loc:
                 if str(stg_x)+'_'+str(stg_y) in self.ref_loc:
