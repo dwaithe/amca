@@ -44,7 +44,7 @@ from pyvcam import pvc
 from pyvcam.camera import Camera
 
 
-
+from compute_focus import compute_focus
 
 
 
@@ -95,7 +95,7 @@ class DynamicUpdate():
 		
 		
 		
-	def load_positions(self):
+	def load_positions(self,positions_file_path):
 		"""This will read the position file which should have been defined before this script.
 		--------------
 		inputs:
@@ -103,7 +103,7 @@ class DynamicUpdate():
 		outputs:
 		None, but populates class pos_x ,pos_y, pos_z coordinate lists.		
 		"""
-		with open(self.positions_file_path, 'r') as f:
+		with open(positions_file_path, 'r') as f:
 
 			for line in f:
 				items = line.split('\t')
@@ -157,7 +157,7 @@ class DynamicUpdate():
 			
 			if self.display_out: cv2.rectangle(frame, pt1,pt2, (0,255,0),1)
 			
-			self.regions[self.stage_pos_z].append([xmin,ymin,w,h])
+			self.regions[self.stage_pos_z].append([xmin,ymin,w,h,score])
 
 			xoutpos = self.voxel_xy*xmin
 			youtpos = self.voxel_xy*ymin
@@ -248,7 +248,7 @@ def analyzeAndMove(detections):
 			d.naive = False
 			d.scanning_up = True
 			d.scanning_down = False
-			d.z_index = 10
+			d.z_index = 1
 		else:
 			#This is the first time this image is seen but there are no regions detected. so we do nothing here and skip to next location
 			d.pos_index += 1
@@ -318,7 +318,7 @@ def analyzeAndMove(detections):
 	### What is the next movement to fulfill.
 	if d.naive == True:
 		d.on_move(d.pos_x[d.pos_index],d.pos_y[d.pos_index],d.pos_z[d.pos_index])
-		time.sleep(1)
+		time.sleep(3)
 	if d.naive == False and d.scanning_up == True:
 
 		move = d.z_stage_move * d.z_index
@@ -541,16 +541,26 @@ if __name__ == '__main__':
 	tfull = time.time()
 	t0 = time.time()
 	print("Running AMCA")
-	d.num_of_tpts = 36
+	d.num_of_tpts = 6*24
+	mins_int = 10.0
+	int_for_refocus = 12
 	starttime = time.time()
 	for tp in range(0,d.num_of_tpts):
+		if tp % int_for_refocus == 0 or tp == 0:
+			print('run refocus')
+			d.analysis_method = 'object'
+			positions_file_path = d.positions_file_path
+		else:
+			d.analysis_method = 'None'
+			positions_file_path = refocus_file_path
+			
 		
 		
 		
 		##time points.
 		d.tp = tp
 		
-		d.load_positions()
+		d.load_positions(positions_file_path)
 		d.init_output_positions()
 		#Query postion of stage x and y.
 		d.on_move(d.pos_x[0],d.pos_y[0],d.pos_z[0])
@@ -685,9 +695,14 @@ if __name__ == '__main__':
 			if out == False:
 				print('Session complete. Time taken (min): '+str(np.round((time.time()-tfull)/60,3)))
 				break;
-		print ("tick",300.0 - ((time.time() - starttime) % 300.0))
-		    
-		time.sleep(300.0 - ((time.time() - starttime) % 300.0))	
+		
+		if tp % int_for_refocus == 0 or tp == 0:
+			print('calculate refocus')
+			
+			refocus_file_path = compute_focus(positions_file_path,d.out_path,tp)
+		else:
+			print ("tick",60*mins_int - ((time.time() - starttime) % 60*mins_int))
+			time.sleep(60*mins_int - ((time.time() - starttime) % 60*mins_int))	
 	
 	d.cam.close()
 	pvc.uninit_pvcam()

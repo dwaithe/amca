@@ -21,7 +21,7 @@ def saveas_imagej_tiff(im_stk, stack_rois,d):
 			r2 = np.clip(reg[2],0,width)
 			r3 = np.clip(reg[3],0,height)
 			roi_b = Roi(r0,r1,r2,r3, width,height,0)
-			roi_b.name = "Region 1"
+			roi_b.name = "Region-1-p-"+str(reg[4])
 			roi_b.roiType = 1
 			if d.ch_to_save == 1:
 				roi_b.setPosition(z)
@@ -83,8 +83,11 @@ def saveas_imagej_tiff(im_stk, stack_rois,d):
 	info += "Stage X-pos: "+str(d.stage_pos_x)+" um.\n" 
 	info += "Stage Y-pos: "+str(d.stage_pos_y)+" um.\n"
 	info += "Piezo Z-pos: "
-	for name in d.regions:
-		info += str(name)+", "
+	if d.regions != {}:
+		for name in d.regions:
+			info += str(name)+", "
+	else:
+		info += str(d.stage_pos_z)+" um.\n"
 	info +=  "(um)\n"
 	
 	

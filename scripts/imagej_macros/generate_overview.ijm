@@ -1,15 +1,15 @@
 //This script generates an overview image of a dataset.
 
 
-srcdir = "/Users/dwaithe/Documents/collaborators/WaitheD/micro_vision/acquisitions/slide1/";
+srcdir = "/media/nvidia/Dominic/0005/";
 FolderList = getFileList(srcdir); 
 
 xCoords = newArray(FolderList.length);
 yCoords = newArray(FolderList.length);
 xCoords_val = newArray(FolderList.length);
 yCoords_val = newArray(FolderList.length);
-img_size = 512;
-pxsz = 0.26;
+img_size = 1024;
+pxsz =332.80/1024;
 
 c =0
 for (k=0; k<FolderList.length; k++) { 
@@ -83,7 +83,7 @@ yCoords_val = Array.trim(yCoords_val, c);
 	sizeX = round((sizeX/pxsz)+img_size);
 	sizeY = round((sizeY/pxsz)+img_size);
 print(sizeX,sizeY);
-exit();
+
 	newImage("out", "8-bit black", sizeX, sizeY, 1);
 //exit();	
 //print("minX",minX,"minY",minY);
