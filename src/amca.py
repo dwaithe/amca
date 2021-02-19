@@ -25,6 +25,9 @@ import socket
 import platform
 import git
 
+#For parsing the experimental configs, getting presets for each experiment.
+from config_exp_parse import parse_acquisition_def
+
 #darknet3AB import
 sys.path.append("../../darknet3AB/darknet")
 import darknet as dk
@@ -43,8 +46,9 @@ import save_img_out
 from pyvcam import pvc
 from pyvcam.camera import Camera
 
+#For focus prediction
+from microscopeimagequality import prediction
 
-from compute_focus import compute_focus
 
 
 
@@ -62,9 +66,13 @@ class DynamicUpdate():
 		self.pos_x = []
 		self.pos_y = []
 		self.pos_z = []
+		self.lower_focus_limit = 30 #um lower limit assuming initial is close to 50um
+		self.upper_focus_limit = 70 #um upper limit assuming initial is close to 50um
 		self.regions = {}
-		
-		
+		self.scores = [] #for focusing.
+		self.best_focus_idx = None
+		self.best_focus = None
+		self.focus_count = 10
 
 		self.pos_index = 0
 		self.z_index = 1
@@ -220,9 +228,113 @@ def imageOnlyAndMove():
 	
 		
 	return True
-
+def focusAndMove(score):
+	"""Will measure focus score in each position, and control up/down direction. Finally, saves best focus position"""
 	
+	delay = False
+	
+	if d.naive == True:
+		#This is the first time this image is seen and we have detected regions. 
+		d.naive = False
+		d.scanning_up = True
+		d.scanning_down = False
+		d.count = 0
+		d.z_index = 1
+		d.scores.append(score)
+	else:
+		current_min = np.min(d.scores)
+		print('score',score,current_min)
+		if d.scanning_up == True and d.scanning_down == False:
+			d.scores.append(score)
+			
+		elif d.scanning_up == False and d.scanning_down == True:
+			d.scores.insert(0,score)
+		
+		if d.count < d.focus_count:
+			#This means that we have found a new minima and should keep searching.
+			print('score and min',score,current_min)
+			d.count += 1
+			pass
+			
+		else:	
+			
+			if d.scanning_up == True and d.scanning_down == False:
+				print('Changing direction.')
+				d.scanning_down = True
+				d.scanning_up = False
+				d.z_index = 1
+				delay = True
+				d.count = 0
+			elif d.scanning_up == False and d.scanning_down == True:
+				## We have scanned up and down. No more cells. So we save and reset.
+				d.scanning_down = False
+				d.scanning_up = False
+				d.naive = True
+				d.z_index = 1
+				
 
+				d.names = []
+				for name in d.img_stk:
+					d.names.append(float(name))
+				names_ordered = d.names
+				names_ordered.sort()
+				d.best_focus_idx = np.argmin(d.scores)
+				d.best_focus = names_ordered[d.best_focus_idx]
+				
+			
+				## Numpy stack of the correct size.
+				np_stk = np.zeros((1,len(names_ordered),d.ch_to_save,d.lim_max_y,d.lim_max_x)).astype(d.exp_depth)
+				z = 0
+						
+				lets_get_meta = []
+				stack_rois = []
+				for name in names_ordered:
+					for ch in range(0,d.ch_to_save):
+						np_stk[0,z,ch,:,:] = d.img_stk[name][ch].astype(d.exp_depth)
+					#stack_rois.append([d.regions[name],z])
+							
+					z+=1
+				###This is where we update the focus.
+				if d.best_focus < d.lower_focus_limit or d.best_focus > d.upper_focus_limit:
+					print('The best focus, for this section is at the limit. No permitting to go further. z-pos:',d.best_focus,' um')
+				else:
+					d.pos_z[d.pos_index] = d.best_focus
+				
+				
+				
+					
+				print('write file')
+				d.pos_index += 1
+				if d.save_out == "ij_tiff":
+					save_img_out.saveas_imagej_tiff(np_stk, stack_rois,d)
+				elif d.save_out == "ome_tiff":
+					save_img_out.saveas_ome_tiff(np_stk, stack_rois,d)
+				d.best_focus_idx = None
+				d.best_focus = None
+				d.img_stk = {}
+				d.scores = []		
+	if d.pos_x.__len__() == d.pos_index:
+		#We are at the end of list.
+		return False 
+	### What is the next movement to fulfill.
+	if d.naive == True:
+		d.on_move(d.pos_x[d.pos_index],d.pos_y[d.pos_index],d.pos_z[d.pos_index])
+		time.sleep(3)
+	if d.naive == False and d.scanning_up == True:
+
+		move = d.z_stage_move * d.z_index
+		d.on_move(d.pos_x[d.pos_index],d.pos_y[d.pos_index],d.pos_z[d.pos_index]+move)
+		d.z_index += 1
+	if d.naive == False and d.scanning_down == True:
+
+		move = d.z_stage_move * d.z_index
+		d.on_move(d.pos_x[d.pos_index],d.pos_y[d.pos_index],d.pos_z[d.pos_index]-move)
+		d.z_index += 1
+		if delay == True:
+			time.sleep(1)
+			delay = False
+		
+	return True
 	
 
 
@@ -335,116 +447,7 @@ def analyzeAndMove(detections):
 		
 	return True
 
-def parse_acquisition_def(path):
-	commands ={}
-	commands['ch_to_image']= None
-	commands['excitation_lines']= None
-	commands['exposures']= None
-	commands['ch_to_analyze']= None
-	commands['ch_to_save']= None
-	commands['cam_gain']= None
-	commands['cam_binning']= None
-	commands['lim_min_x']= None
-	commands['lim_max_x']= None
-	commands['lim_min_y']= None
-	commands['lim_max_y']= None
-	commands['clim_min_x']= None
-	commands['clim_max_x']= None
-	commands['clim_min_y']= None
-	commands['clim_max_y']= None
-	commands['digital_binning']= None
-	commands['cam_pixel_size']= None
-	commands['objective_mag']= None
-	commands['objective_type']= None
-	commands['camera_type']= None
-	commands['lamp_type']= None
-	commands['microscope_type']= None
-	commands['analysis_method']= None
-	commands['z_stage_move']= None
-	
-	commands['display_out']= None
-	commands['out_path']= None
-	commands['save_out']= None
-	commands['positions_file_path']= None
-	commands['output_positions_name']= None
-	commands['exp_depth']= None
-	
-	commands['dkrepo']= None
-	commands['algorithm_name']= None
-	commands['config_path']= None
-	commands['meta_path']= None
-	commands['weight_path']= None
-	
-	
-	
 
-	f = open(path, "rt")
-	lines = f.readlines()
-	for pr in lines:
-		line = pr.strip("\n").split('#')[0]
-		chunk = None
-		if line.split("=").__len__() >1:
-			chunk = line.split("=")[0].strip(" ")
-			value = line.split("=")[1].strip(" ")
-			
-			if chunk in commands:
-				#print(chunk,value)
-				if chunk == "ch_to_image": commands['ch_to_image'] = int(value)
-				elif chunk == "excitation_lines": 
-					commands['excitation_lines'] =value.strip("[").strip("]").replace('"', '').replace("'", '').split(",")
-				elif chunk == 'exposures': 
-					values = value.strip("[").strip("]").split(",")
-					commands['exposures'] = []
-					for val in values:
-						commands['exposures'].append(int(val))
-				elif chunk == 'ch_to_analyze': commands['ch_to_analyze'] = int(value)
-				elif chunk == 'ch_to_save': commands['ch_to_save'] = int(value)
-				elif chunk == 'cam_gain': commands['cam_gain'] = int(value)
-				elif chunk == 'cam_binning': commands['cam_binning'] = int(value)
-				elif chunk == 'lim_min_x': commands['lim_min_x'] = int(value)
-				elif chunk == 'lim_max_x': commands['lim_max_x'] = int(value)
-				elif chunk == 'lim_min_y': commands['lim_min_y'] = int(value)
-				elif chunk == 'lim_max_y': commands['lim_max_y'] = int(value)
-				elif chunk == 'clim_min_x': commands['clim_min_x'] = int(value)
-				elif chunk == 'clim_max_x': commands['clim_max_x'] = int(value)
-				elif chunk == 'clim_min_y': commands['clim_min_y'] = int(value)
-				elif chunk == 'clim_max_y': commands['clim_max_y'] = int(value)
-				elif chunk == 'digital_binning': commands['digital_binning'] = int(value)
-				elif chunk == 'cam_pixel_size': commands['cam_pixel_size'] = float(value)
-				elif chunk == 'objective_mag': commands['objective_mag'] = int(value)
-				elif chunk == 'objective_type': commands['objective_type'] = str(value.strip('"').strip("'"))
-				elif chunk == 'camera_type': commands['camera_type'] = str(value.strip('"').strip("'"))
-				elif chunk == 'lamp_type': commands['lamp_type'] = str(value.strip('"').strip("'"))
-				elif chunk == 'microscope_type': commands['microscope_type'] = str(value.strip('"').strip("'"))
-				elif chunk == 'analysis_method': commands['analysis_method'] = str(value.strip('"').strip("'"))
-				elif chunk == 'z_stage_move': commands['z_stage_move'] = float(value)
-				
-				elif chunk == 'display_out': 
-					booln = value.replace('"', '').replace("'", '')
-					if booln == "False":
-						 commands['display_out'] = False
-					if booln == "True":
-						 commands['display_out'] = True
-						
-				
-				elif chunk == 'out_path': commands['out_path'] =  str(value.strip('"').strip("'"))
-				elif chunk == 'save_out': commands['save_out'] =  str(value.strip('"').strip("'"))
-				elif chunk == 'positions_file_path': commands['positions_file_path'] =  str(value.strip('"').strip("'"))
-				elif chunk == 'output_positions_name': commands['output_positions_name'] =  str(value.strip('"').strip("'"))
-
-				elif chunk == 'exp_depth': 
-					if value == 'np.uint16':
-						commands['exp_depth'] = np.uint16
-				elif chunk == 'dkrepo':commands['dkrepo'] = str(value).replace('"', '').replace("'", '')
-				elif chunk == 'algorithm_name':commands['algorithm_name'] = str(value).replace('"', '').replace("'", '')
-				elif chunk == 'config_path':commands['config_path'] = str(value).replace('"', '').replace("'", '')
-				elif chunk == 'meta_path':commands['meta_path'] = str(value).replace('"', '').replace("'", '')
-				elif chunk == 'weight_path':commands['weight_path'] = str(value).replace('"', '').replace("'", '')
-	for it in commands:
-		if commands[it] == None:
-			print(commands[it])		
-	return commands
-	
 
 
 if __name__ == '__main__':
@@ -497,13 +500,19 @@ if __name__ == '__main__':
 	###Visualization.
 	d.display_out = params['display_out']#False
 	###Input and output.
-	d.out_path = params['out_path']#"/media/nvidia/DOXIE_SD/0004/"
+	d.out_path = params['out_path']#e.g."/media/nvidia/DOXIE_SD/0004/"
 	d.save_out = params['save_out']#"ij_tiff" #"ij_tiff" or "ome_tiff"
 	d.positions_file_path = params['positions_file_path'] #"../pos_files/POS_FILE.txt"
 	d.output_positions_name = params['output_positions_name']#"file_pos_export.txt"
 	d.output_positions_file = d.out_path+"/"+d.output_positions_name
 	d.exp_depth = params['exp_depth']
 	###Output text description
+	
+	d.num_of_tpts = 6*48 #Total number of timepoints.
+	d.mins_int = 10.0 #Time (minutes) to wait between each interval.
+	d.int_for_refocus = 6 #Interval for recalculating focus (e.g. 6 represents on every sixth timepoint).
+	d.focus_count = 10 #Number of slices above to acquire and number of slices below to acquire for initial focus.
+	
 	
 	###Just some tests before we engage.
 	assert d.ch_to_image <= d.exposures.__len__(), "please define channels to image <= number of exposures as channels to image."
@@ -522,10 +531,11 @@ if __name__ == '__main__':
 	
 	
 	
+	focus_weight_path = "/home/nvidia/Documents/models/focus_model/model.ckpt-1000042"
+	focus_model = prediction.ImageQualityClassifier(focus_weight_path,84,11)
 	
-	
-	
-	
+	d.load_positions(d.positions_file_path)
+	d.init_output_positions()
 	
 	### Loads the network in.
 	if params['algorithm_name'] != "": 
@@ -537,22 +547,27 @@ if __name__ == '__main__':
 		darknet_image = dk.make_image(d.output_wid,d.output_hei,3)
 	im = np.zeros((d.lim_max_y,d.lim_max_x,3)).astype(np.uint8)
 	spa_sam = d.digital_binning 
+	
+	
+	
 	#####The main loop. This will keep going till all the stage positions have been visited.
 	tfull = time.time()
 	t0 = time.time()
 	print("Running AMCA")
-	d.num_of_tpts = 6*24
-	mins_int = 10.0
-	int_for_refocus = 12
+	
+	
 	starttime = time.time()
 	for tp in range(0,d.num_of_tpts):
-		if tp % int_for_refocus == 0 or tp == 0:
+		if tp % d.int_for_refocus == 0 or tp == 0:
 			print('run refocus')
-			d.analysis_method = 'object'
-			positions_file_path = d.positions_file_path
+			
+			d.analysis_method = 'Focus'
+			
 		else:
+			d.focus_count = 5 #Number of slices above and additionally below to acquire for subsequent focus calculation.
+			print('close file')
 			d.analysis_method = 'None'
-			positions_file_path = refocus_file_path
+			
 			
 		
 		
@@ -560,10 +575,10 @@ if __name__ == '__main__':
 		##time points.
 		d.tp = tp
 		
-		d.load_positions(positions_file_path)
-		d.init_output_positions()
+		d.pos_index = 0 
 		#Query postion of stage x and y.
 		d.on_move(d.pos_x[0],d.pos_y[0],d.pos_z[0])
+		time.sleep(2)
 		while True:
 			## Collect frames and loops positions.
 			
@@ -660,6 +675,33 @@ if __name__ == '__main__':
 				t4 = time.time()
 				out = imageOnlyAndMove()
 				t5 = time.time()
+			if d.analysis_method == 'Focus':
+				if d.ch_to_analyze == 1:
+					imt = frame_CH1
+			
+				elif d.ch_to_analyze == 2:
+					imt = frame_CH2	
+				
+				elif d.ch_to_analyze.__len__() == 3:
+					imt = frame_CH3 
+				
+				focus_vals = focus_model.get_patch_predictions(imt)
+				score = 0
+				for val in focus_vals:
+					opa = val[4].predictions
+					score += opa
+				
+				t3 = time.time()
+				#Save image to stack.
+				if d.ch_to_save == 1:
+					d.img_stk[d.stage_pos_z] = [frame_CH1]
+				if d.ch_to_save == 2:
+					d.img_stk[d.stage_pos_z] = [frame_CH1,frame_CH2]
+				if d.ch_to_save == 3:
+					d.img_stk[d.stage_pos_z] = [frame_CH1,frame_CH2,frame_CH3]
+				t4 = time.time()
+				out = focusAndMove(score)
+				t5 = time.time()
 			if d.analysis_method == 'Crop':
 				
 				imc = im[d.clim_min_y:d.clim_max_y,d.clim_min_x:d.clim_max_x,:]
@@ -696,13 +738,14 @@ if __name__ == '__main__':
 				print('Session complete. Time taken (min): '+str(np.round((time.time()-tfull)/60,3)))
 				break;
 		
-		if tp % int_for_refocus == 0 or tp == 0:
-			print('calculate refocus')
+		if tp == 0:
 			
-			refocus_file_path = compute_focus(positions_file_path,d.out_path,tp)
+			pass
+			
 		else:
-			print ("tick",60*mins_int - ((time.time() - starttime) % 60*mins_int))
-			time.sleep(60*mins_int - ((time.time() - starttime) % 60*mins_int))	
+			print ("will sleep for (s)",60*d.mins_int - ((time.time() - starttime) % 60))
+			time.sleep(60*d.mins_int - ((time.time() - starttime) % 60))	
+			
 	
 	d.cam.close()
 	pvc.uninit_pvcam()

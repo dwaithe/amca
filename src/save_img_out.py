@@ -77,18 +77,22 @@ def saveas_imagej_tiff(im_stk, stack_rois,d):
 	info += "Detection model configuration: "+str(d.config_path)+".\n"
 	info += "Detection model weights: "+str(d.weight_path)+".\n"
 	info += "Detection metadata: "+str(d.meta_path)+".\n"
+	info += "Analysis method: "+str(d.analysis_method)+".\n"
 	info += "-----------------------\n"
 	info += "Acquisition performed at: "+datetime.now().strftime("%Y/%m/%d, %H:%M:%S") +".\n"
 	info += "-----------------------\n"
 	info += "Stage X-pos: "+str(d.stage_pos_x)+" um.\n" 
 	info += "Stage Y-pos: "+str(d.stage_pos_y)+" um.\n"
 	info += "Piezo Z-pos: "
-	if d.regions != {}:
-		for name in d.regions:
+	if d.names != []:
+		for name in d.names:
 			info += str(name)+", "
 	else:
 		info += str(d.stage_pos_z)+" um.\n"
 	info +=  "(um)\n"
+	if d.best_focus_idx != None:
+		info += "best_focus_idx: "+str(d.best_focus_idx)+"\n" 
+		info += "best_focus_um: "+str(d.best_focus)+" um.\n" 
 	
 	
 	resolution = (1./d.voxel_xy,1./d.voxel_xy) #Expects tuple, ratio pixel to physical unit (for unit see 'unit').
