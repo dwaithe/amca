@@ -381,7 +381,7 @@ class ConvertROItoCellVolumes():
                     B = (np.random.random()) # same random number as before
                     plt.plot([rx0,rx0,rx1,rx1,rx0],[ry0,ry1,ry1,ry0,ry0],'-o',c=[R,G,B])
 
-def return_data_from_reg(img_stk, roi_array,type_of_data):
+def return_data_from_reg(img_stk, roi_array,type_of_data,zpos_ind=False):
         """This function allows you to extract data from the processed regions.
         In each case, the function will return a dictionary, with one entry per cell. Depending on the 
         type_of_data variable value a different thing will returned:
@@ -400,17 +400,20 @@ def return_data_from_reg(img_stk, roi_array,type_of_data):
             for roi in roi_array:
 
                 if roi.position == z+1 or roi.slice == z+1:
-                    rx0 = roi.x
-                    rx1 = roi.x+roi.width
-                    ry0 = roi.y
-                    ry1 = roi.y+roi.height
+                    rx0 = int(roi.x)
+                    rx1 = int(roi.x+roi.width)
+                    ry0 = int(roi.y)
+                    ry1 = int(roi.y+roi.height)
 
                     
-
-                    idname = roi.name.replace('\x00', '').split('-')[1]
+                    if zpos_ind == False:
+                        idname = roi.name.replace('\x00', '').split('-')[1]
+                    else:
+                        idname = z
                     if idname not in regions:
                         regions[idname] = []
-                    if type_of_data == 'raw' or type_of_data == 'max_project' or type_of_data == 'mean_max_project':                 
+                    if type_of_data == 'raw' or type_of_data == 'max_project' or type_of_data == 'mean_max_project':  
+                        #print(idname,ry0,ry1,rx0,rx1)               
                         regions[idname].append(im[ry0:ry1,rx0:rx1])
                         
                     if type_of_data == 'mean':                 
@@ -464,21 +467,23 @@ def return_overlay(tfile):
     else:
         print('no Overlays present in file.')
     return roi_array
-def collect_info(outpath,channel,method):
+def collect_info(outpath,channel,method,zpos_ind=False):
     store_cell_data = []
     filenames = glob.glob(outpath+"/*.tif*")
     for pathname in filenames:
+        print('pathname',pathname)
         tfile = tifffile.TiffFile(pathname)
         img_stk = tfile.asarray()
         roi_array = return_overlay(tfile)
-        if img_stk.shape.__len__() <4:
-            continue
-        img_stk = img_stk[:,channel,:,:]
-        data = return_data_from_reg(img_stk, roi_array,method)
+        if img_stk.shape.__len__() == 3:
+            img_stk = img_stk[:,:,:]
+        if img_stk.shape.__len__() == 4:
+            img_stk = img_stk[:,channel,:,:]
+        data = return_data_from_reg(img_stk, roi_array, method,zpos_ind)
         for cell in data:
             store_cell_data.append(data[cell])
         tfile.close()
-    return store_cell_data
+    return store_cell_data, roi_array
 def normalise_for_8bit(raw_img):
     sorted_img = np.sort(raw_img.flatten())
     sat_fac = 0.3 #Matches Fiji/ImageJ saturation factor of 0.3%
