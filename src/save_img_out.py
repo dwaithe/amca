@@ -21,7 +21,7 @@ def saveas_imagej_tiff(im_stk, stack_rois,d):
 			r2 = np.clip(reg[2],0,width)
 			r3 = np.clip(reg[3],0,height)
 			roi_b = Roi(r0,r1,r2,r3, width,height,0)
-			roi_b.name = "Region 1"
+			roi_b.name = "Region-1-p-"+str(reg[4])
 			roi_b.roiType = 1
 			if d.ch_to_save == 1:
 				roi_b.setPosition(z)
@@ -77,15 +77,22 @@ def saveas_imagej_tiff(im_stk, stack_rois,d):
 	info += "Detection model configuration: "+str(d.config_path)+".\n"
 	info += "Detection model weights: "+str(d.weight_path)+".\n"
 	info += "Detection metadata: "+str(d.meta_path)+".\n"
+	info += "Analysis method: "+str(d.analysis_method)+".\n"
 	info += "-----------------------\n"
 	info += "Acquisition performed at: "+datetime.now().strftime("%Y/%m/%d, %H:%M:%S") +".\n"
 	info += "-----------------------\n"
 	info += "Stage X-pos: "+str(d.stage_pos_x)+" um.\n" 
 	info += "Stage Y-pos: "+str(d.stage_pos_y)+" um.\n"
 	info += "Piezo Z-pos: "
-	for name in d.regions:
-		info += str(name)+", "
+	if d.names != []:
+		for name in d.names:
+			info += str(name)+", "
+	else:
+		info += str(d.stage_pos_z)+" um.\n"
 	info +=  "(um)\n"
+	if d.best_focus_idx != None:
+		info += "best_focus_idx: "+str(d.best_focus_idx)+"\n" 
+		info += "best_focus_um: "+str(d.best_focus)+" um.\n" 
 	
 	
 	resolution = (1./d.voxel_xy,1./d.voxel_xy) #Expects tuple, ratio pixel to physical unit (for unit see 'unit').

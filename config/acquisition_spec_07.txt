@@ -1,16 +1,20 @@
-ch_to_image = 2 #Number of channels.
-excitation_lines = ['1V','3GYR']#['1V','2B','3GYR']
-exposures = [50, 100] ##Remember to coordinate with order in lamp.
+ch_to_image = 1 #Number of channels.
+excitation_lines = ['3GYR']#,'3GYR']#['1V','2B','3GYR']
+exposures = [150]#[50, 100] ##Remember to coordinate with order in lamp.
 ###The number of channels to analyze.
 ch_to_analyze = 1 ##Will always take first from available. Number not index.
 ###The number of channels to save.
-ch_to_save = 2 ##Less than equal to ch_to_image, usually the same.
+ch_to_save = 1 ##Less than equal to ch_to_image, usually the same.
 cam_gain = 1 ##Camera gain.
 cam_binning = 2 #Binning to set camera to collect at
 lim_min_x = 0 #expected limits. Should correspond with what is coming out of camera.
 lim_max_x = 512 #expected limits
 lim_min_y = 0 #expected limits
-lim_max_y =512 #expected limits
+lim_max_y = 512 #expected limits
+clim_min_x = 0 #crop limits
+clim_max_x = 0 #crop limits
+clim_min_y = 0 #crop limits
+clim_max_y = 0 #crop limits
 digital_binning = 2 #Digital binning to apply (see below).
 cam_pixel_size = 6.5 #um Fixed pixel size of camera
 objective_mag = 100
@@ -18,13 +22,13 @@ objective_type = "Olympus UPlanSApo 1.4 NA Oil"
 camera_type = "Photometrics Prime sCMOS"
 lamp_type = "CoolLED pE-300 Ultra"
 microscope_type = "Olympus IX71"
-analysis_method = "object"
+analysis_method = "None" 
 z_stage_move = 0.5 #um
 
 ###Visualization.
 display_out = False
 ###Input and output.
-out_path = "/media/nvidia/Dominic/0006/"
+out_path = "/media/nvidia/Dominic/0012/"
 save_out = "ij_tiff" #"ij_tiff" or "ome_tiff"
 positions_file_path = "../pos_files/POS_FILE.txt"
 output_positions_name = "/file_pos_export.txt"
@@ -34,7 +38,7 @@ exp_depth = np.uint16
 dkrepo = "../../darknet3AB/darknet"
 algorithm_name = "YOLOv2 Darknet3"
 config_path = "../../darknet3AB/darknet/cfg/yolov2_dk3AB-classes-1-flip.cfg"
-meta_path =  "../../cell_datasets/cho_dapi_class/2020/obj_cho_dapi_class50.data"
-weight_path = "../../models/darknet/cho_dapi_class50/yolov2_dk3AB-classes-1-flip_final.weights" 
+meta_path =  "../../cell_datasets/cho_rfp_pcna_class/2020/obj_cho_rfp_pcna_class50.data"
+weight_path = "../../models/darknet/U2OS_RFP_class50/RFP-PCNA-yolov2_dk3AB-classes-1-flip_last.weights" 
 	
 	

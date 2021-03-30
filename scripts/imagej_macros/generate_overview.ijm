@@ -4,17 +4,20 @@ srcdir = "/Volumes/Dominic/2021_01_22_0004_20x_air/";
 img_size = 1024;// for 20x
 pxsz = 665.60/1024;
 
+
 //srcdir = "//Volumes/Dominic/2021_01_22_0005_40x_air/";
 //img_size = 1024; //for 100x
 //pxsz = 332/1024;
 
 setBatchMode("hide");
-FolderList = getFileList(srcdir); 
 
-xCoords = newArray(FolderList.length);
-yCoords = newArray(FolderList.length);
-xCoords_val = newArray(FolderList.length);
-yCoords_val = newArray(FolderList.length);
+srcdir = "/media/nvidia/Dominic/0005/";
+
+
+
+img_size = 1024;
+pxsz =332.80/1024;
+
 
 c =0
 for (k=0; k<FolderList.length; k++) { 
@@ -88,7 +91,10 @@ yCoords_val = Array.trim(yCoords_val, c);
 	sizeX = round((sizeX/pxsz)+img_size);
 	sizeY = round((sizeY/pxsz)+img_size);
 
-	newImage("out", "16-bit black", sizeX, sizeY, 1);
+print(sizeX,sizeY);
+
+	newImage("out", "8-bit black", sizeX, sizeY, 1);
+
 //exit();	
 //print("minX",minX,"minY",minY);
 for (k=0; k<xCoords.length; k++) { 
