@@ -7,13 +7,13 @@
 out_file_log="dot_to_dot" 
 #dataset0,dataset8,dataset10,dataset11,dataset12,dataset14
 
-#start #dot_to_tdo
+start #dot_to_tdo
 faster_rcnn_model_init=""
 darknet2_model_init="darknet19_448.conv.23"
 darknet3_model_init="darknet53.conv.74"
 retinanet_model_init=""
 train_on_dataset="dataset31"
-classes=14
+classes=15
 flip_on=False
 test_on_dataset="dataset31"
 number_of_repetitions=1
