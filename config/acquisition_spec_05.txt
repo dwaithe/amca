@@ -1,0 +1,40 @@
+ch_to_image = 2 #Number of channels.
+excitation_lines = ['1V','3GYR']#['1V','2B','3GYR']
+exposures = [50, 100] ##Remember to coordinate with order in lamp.
+###The number of channels to analyze.
+ch_to_analyze = 1 ##Will always take first from available. Number not index.
+###The number of channels to save.
+ch_to_save = 2 ##Less than equal to ch_to_image, usually the same.
+cam_gain = 1 ##Camera gain.
+cam_binning = 2 #Binning to set camera to collect at
+lim_min_x = 0 #expected limits. Should correspond with what is coming out of camera.
+lim_max_x = 1024 #expected limits
+lim_min_y = 0 #expected limits
+lim_max_y = 1024 #expected limits
+digital_binning = 1 #Digital binning to apply (see below).
+cam_pixel_size = 6.5 #um Fixed pixel size of camera
+objective_mag = 40
+objective_type = "Olympus UPlanSApo 0.95 NA"
+camera_type = "Photometrics Prime sCMOS"
+lamp_type = "CoolLED pE-300 Ultra"
+microscope_type = "Olympus IX71"
+analysis_method = "None"
+z_stage_move = 0.5 #um
+
+###Visualization.
+display_out = False
+###Input and output.
+out_path = "/media/nvidia/Dominic/0005/"
+save_out = "ij_tiff" #"ij_tiff" or "ome_tiff"
+positions_file_path = "../pos_files/POS_FILE.txt"
+output_positions_name = "/file_pos_export.txt"
+exp_depth = np.uint16
+###Output text description
+
+dkrepo = ""
+algorithm_name = ""
+config_path = ""
+meta_path =  ""
+weight_path = "" 
+	
+	

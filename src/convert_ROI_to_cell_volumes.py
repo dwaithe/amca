@@ -6,7 +6,9 @@ from ijroi.ij_roi import Roi
 from ijroi.ijpython_encoder import encode_ij_roi,RGB_encoder
 from ijroi.ijpython_decoder import decode_ij_roi
 import tifffile
-
+import matplotlib.pylab as plt
+import glob
+import pyperclip
 
 class ConvertROItoCellVolumes():
     def __init__(self,img_width, img_height, border_offset, scale, zspacing, filepath, outpath):
@@ -117,7 +119,7 @@ class ConvertROItoCellVolumes():
         x_unq = np.unique(trk_mat[0,:])
         y_unq = np.unique(trk_mat[1,:])
         z_unq = np.unique(trk_mat[2,:])
-
+        
         #Scans all positions and finds size of tiff files.
         for y_pos in y_unq:
             for x_pos in x_unq:
@@ -127,18 +129,18 @@ class ConvertROItoCellVolumes():
                 if zval.__len__() >0:
                     nmin = np.round(np.min(zval),2)
                     nmax = np.round(np.max(zval),2)
-                    ref_loc[str(x_pos)+'_'+str(y_pos)] = [nmin,nmax,int(((nmax-nmin)/self.zspacing)+1)]
+                    ref_loc[str(x_pos)+'_'+str(y_pos)] = [nmin,nmax,int(((nmax-nmin)/self.zspacing)+1),0]
         file.close()
         ##In the position file            
-        file_name = self.filepath+self.POS_FILE_NAME
-        file = open(file_name,"r")
+        #file_name = self.filepath+self.POS_FILE_NAME
+        #file = open(file_name,"r")
 
 
-        for line in file:
-            coord = line.strip('\n').split('\t')
-            if coord[0]+'_'+coord[1] in ref_loc:
-                ref_loc[coord[0]+'_'+coord[1]].append(np.round(float(coord[2]),2))
-        file.close()
+        #for line in file:
+        #    coord = line.strip('\n').split('\t')
+        #    if coord[0]+'_'+coord[1] in ref_loc:
+        #        ref_loc[coord[0]+'_'+coord[1]].append(np.round(float(coord[2]),2))
+        #file.close()
         return x_unq, y_unq, z_unq, ref_loc, trk_mat
     
     
@@ -219,7 +221,8 @@ class ConvertROItoCellVolumes():
                     for c in range(0,trs.shape[1]):
                         x1 = trs[0,c] + (self.img_width*self.scale - trs[3,c]) - trs[5,c]
                         y1 = trs[1,c] + trs[4,c]
-                        z = trs[2,c]
+                        z = float(trs[2,c])
+                       
                         x2 = x1+(trs[5,c])
                         y2 = y1+(trs[6,c])
                         detstxt = np.array([x1,y1,x2,y2]).astype(np.float64)
@@ -242,18 +245,21 @@ class ConvertROItoCellVolumes():
             idx = np.where(out_results[:,4] == idt)
             if idx[0].shape[0] >2:
 
-                out_results[idx,0] = np.min(out_results[idx,0])
-                out_results[idx,1] = np.min(out_results[idx,1])
-                out_results[idx,2] = np.max(out_results[idx,2])
-                out_results[idx,3] = np.max(out_results[idx,3])
+                out_results[idx,0] = np.average(out_results[idx,0])
+                out_results[idx,1] = np.average(out_results[idx,1])
+                out_results[idx,2] = np.average(out_results[idx,2])
+                out_results[idx,3] = np.average(out_results[idx,3])
                 for idx0 in idx[0]:
                     out_out.append(out_results[idx0,:])
         
         final_out = np.array(out_out).T
+        
         with open(self.filepath+self.OUTPUT_PRED_FILE, 'w') as the_file:
             out_str =""
             for outline in out_out:
-                out_str += np.array2string(outline, precision=2, separator=',', suppress_small=True)[1:-1]+'\n'
+                newline = np.array2string(outline.astype(np.float64), precision=2, separator=',', suppress_small=True, max_line_width=1000000)
+                out_str += newline[1:-1] +'\n'
+                
             the_file.write(out_str)
         return final_out
     def append_new_regions(self, outpath, extend_roi=True):
@@ -265,8 +271,11 @@ class ConvertROItoCellVolumes():
         """
         for stg_x in self.x_unq:
             for stg_y in self.y_unq:
-                pathname2 ="img_stk_x_"+str(stg_x)+"y_"+str(stg_y)+".tif"
+                pathname2 ="img_stk_x_"+str(stg_x)+"y_"+str(stg_y)+"t_0021.tif"
                 input_file = self.filepath+self.subfolder_for_images+pathname2
+
+
+
                 output_file = outpath+pathname2
                 #for ref in ref_loc:
                 if str(stg_x)+'_'+str(stg_y) in self.ref_loc:
@@ -283,29 +292,42 @@ class ConvertROItoCellVolumes():
                     #Get existing metadata
                     metadata = tfile.imagej_metadata
                     #Get existing image-data.
+                    
                     im_stk = tfile.asarray()
+                    
+
+                    
+
 
                     #Run through each region in the image.
                     for trk in range(0,trks.shape[1]):
 
                         trkv = trks[:,trk]
                         x0 = (trkv[0]-trkv[5])
-                        wid = (trkv[2]-trkv[5])-x0
+                       
                         y0 = (trkv[1]-trkv[6])
+
+                        wid = (trkv[2]-trkv[5])-x0
                         hei = (trkv[3]-trkv[6])-y0
 
+
                         #Inititate each region.
-                        roi_b = Roi(self.img_width-(x0/self.scale)-(wid/self.scale),y0/self.scale,wid/self.scale,hei/self.scale, self.img_height, self.img_width,0)
+                        roi_b = Roi(self.img_width-(x0/self.scale)-(wid/self.scale),y0/self.scale, hei/self.scale, wid/self.scale, self.img_height, self.img_width,0)
                         roi_b.name = "Region-"+str(int(trkv[4]))
                         roi_b.roiType = 1
-
+                        
                         #Find which slice the location refers to.
                         
                         slices = self.ref_loc[str(trkv[5])+'_'+str(trkv[6])]
                        
                         ranget = list(np.round(np.arange(slices[0],slices[1]+self.zspacing,self.zspacing),2))
+
                         
                         roi_b.position = ranget.index(np.round(trkv[7],2))+1
+                        
+                        roi_b.channel = 1
+                        
+                        roi_b.setPositionH( 1, ranget.index(np.round(trkv[7],2))+1, 0)
 
                         roi_b.strokeLineWidth = 3.0
                         #Colours each volume-region uniquely.
@@ -321,10 +343,10 @@ class ConvertROItoCellVolumes():
                         metadata['Overlays'] = data
 
 
-                    tifffile.imsave(output_file,im_stk, shape=im_stk.shape,imagej=True,ijmetadata=metadata)
+                    tifffile.imsave(output_file,im_stk, shape=im_stk.shape, imagej=True, ijmetadata=metadata)
                     tfile.close()
                     
-    def plot_reg(self,input_file):
+    def plot_reg(self,input_file,ch):
         """plot the roi_array for an image stack.
         
         This function will for an input image export the overlays.
@@ -338,28 +360,28 @@ class ConvertROItoCellVolumes():
         img_shape = img_stk.shape
         
 
-        roi_array = self.return_overlay(tfile)
+        roi_array = return_overlay(tfile)
         
         for z in range(0,img_stk.shape[0]):
-            im = img_stk[z,:,:]
-            figure()
-            imshow(im)
+            im = img_stk[z,ch,:,:]
+            plt.figure()
+            plt.imshow(im)
             for roi in roi_array:
 
-                if roi.position == z+1:
+                if roi.position == z+1 or roi.slice == z+1:
                     
                     idname = int(roi.name.replace('\x00', '').split('-')[1])
                     rx0 = roi.x
                     rx1 = roi.x+roi.width
                     ry0 = roi.y
                     ry1 = roi.y+roi.height
-                    random.seed( idname )
-                    R = (random.random())  # same random number as before
-                    G = (random.random())  # same random number as before
-                    B = (random.random()) # same random number as before
-                    plot([rx0,rx0,rx1,rx1,rx0],[ry0,ry1,ry1,ry0,ry0],'-o',c=[R,G,B])
+                    np.random.seed( idname )
+                    R = (np.random.random())  # same random number as before
+                    G = (np.random.random())  # same random number as before
+                    B = (np.random.random()) # same random number as before
+                    plt.plot([rx0,rx0,rx1,rx1,rx0],[ry0,ry1,ry1,ry0,ry0],'-o',c=[R,G,B])
 
-    def return_data_from_reg(self,img_stk, roi_array,type_of_data):
+def return_data_from_reg(img_stk, roi_array,type_of_data,zpos_ind=False):
         """This function allows you to extract data from the processed regions.
         In each case, the function will return a dictionary, with one entry per cell. Depending on the 
         type_of_data variable value a different thing will returned:
@@ -377,17 +399,23 @@ class ConvertROItoCellVolumes():
 
             for roi in roi_array:
 
-                if roi.position == z+1:
-                    rx0 = roi.x
-                    rx1 = roi.x+roi.width
-                    ry0 = roi.y
-                    ry1 = roi.y+roi.height
+                if roi.position == z+1 or roi.slice == z+1:
+                    rx0 = int(roi.x)
+                    rx1 = int(roi.x+roi.width)
+                    ry0 = int(roi.y)
+                    ry1 = int(roi.y+roi.height)
 
-                    idname = roi.name.replace('\x00', '').split('-')[1]
+                    
+                    if zpos_ind == False:
+                        idname = roi.name.replace('\x00', '').split('-')[1]
+                    else:
+                        idname = z
                     if idname not in regions:
                         regions[idname] = []
-                    if type_of_data == 'raw' or type_of_data == 'max_project' or type_of_data == 'mean_max_project':                 
+                    if type_of_data == 'raw' or type_of_data == 'max_project' or type_of_data == 'mean_max_project':  
+                        #print(idname,ry0,ry1,rx0,rx1)               
                         regions[idname].append(im[ry0:ry1,rx0:rx1])
+                        
                     if type_of_data == 'mean':                 
                         regions[idname].append(np.average(im[ry0:ry1,rx0:rx1]))
                     if type_of_data == 'sum':
@@ -397,7 +425,8 @@ class ConvertROItoCellVolumes():
         
         if type_of_data == 'max_project':
             for cell in regions:
-                regions[cell] = np.max(regions[cell],0)
+
+                regions[cell] = np.max(np.array(regions[cell]),0)
         if type_of_data == 'mean':                 
             for cell in regions:
                 regions[cell] = np.average(regions[cell])
@@ -415,24 +444,74 @@ class ConvertROItoCellVolumes():
                 regions[cell] = np.sum(regions[cell])
 
         return regions
-    def return_overlay(self, tfile):
-        """ Get existing metadata"""
-        metadata = tfile.imagej_metadata
-        img_stk = tfile.asarray()
-        img_shape = img_stk.shape
+def return_overlay(tfile):
+    """ Get existing metadata"""
+    metadata = tfile.imagej_metadata
+    img_stk = tfile.asarray()
+    img_shape = img_stk.shape
+    if img_shape.__len__()>3:#If it's a hyperstack, we skip channels.
+        img_shape = [img_shape[0],img_shape[2],img_shape[3]]
 
 
-        roi_array = []
-        if 'Overlays' in tfile.imagej_metadata:
-            overlays = tfile.imagej_metadata['Overlays']
-            if overlays.__class__.__name__ == 'list':
-                #Multiple overlays and so iterate.
-                for overlay in overlays:
-                    roi_array.append(decode_ij_roi(overlay,img_shape))
-            else:
-                #One overlay.
-                print ('overlays',overlays)
-                roi_array = decode_ij_roi(overlays,img_shape)
+    roi_array = []
+    if 'Overlays' in tfile.imagej_metadata:
+        overlays = tfile.imagej_metadata['Overlays']
+        if overlays.__class__.__name__ == 'list':
+            #Multiple overlays and so iterate.
+            for overlay in overlays:
+                roi_array.append(decode_ij_roi(overlay,img_shape))
         else:
-            print('no Overlays present in file.')
-        return roi_array
+            #One overlay.
+            print ('overlays',overlays)
+            roi_array = decode_ij_roi(overlays,img_shape)
+    else:
+        print('no Overlays present in file.')
+    return roi_array
+def collect_info(outpath,channel,method,zpos_ind=False):
+    store_cell_data = []
+    filenames = glob.glob(outpath+"/*.tif*")
+    for pathname in filenames:
+        print('pathname',pathname)
+        tfile = tifffile.TiffFile(pathname)
+        img_stk = tfile.asarray()
+        roi_array = return_overlay(tfile)
+        if img_stk.shape.__len__() == 3:
+            img_stk = img_stk[:,:,:]
+        if img_stk.shape.__len__() == 4:
+            img_stk = img_stk[:,channel,:,:]
+        data = return_data_from_reg(img_stk, roi_array, method,zpos_ind)
+        for cell in data:
+            store_cell_data.append(data[cell])
+        tfile.close()
+    return store_cell_data, roi_array
+def normalise_for_8bit(raw_img):
+    sorted_img = np.sort(raw_img.flatten())
+    sat_fac = 0.3 #Matches Fiji/ImageJ saturation factor of 0.3%
+    img_min = int(np.ceil(sorted_img.shape[0]*((sat_fac/2.)/100.)))
+    img_max = int(np.floor(sorted_img.shape[0]*((100.-(sat_fac/2.))/100.)))
+
+    lower_bound = sorted_img[img_min]
+    upper_bound = sorted_img[img_max]
+    #This is very similar to the ImageJ/Fiji methodoloy when saving JPEGs but isn't exactly the same.
+    lut = np.concatenate([
+            np.zeros(lower_bound, dtype=np.uint16),
+            np.linspace(0, 255, upper_bound - lower_bound).astype(np.uint16),
+            np.ones(2**16 - upper_bound, dtype=np.uint16) * 255
+        ])
+
+    bit_img = lut[raw_img].astype(np.uint8)
+    return bit_img
+def copy_to_clipboard(cell_data):
+    stg = ""
+    maxt = 0
+    for num in range(0,cell_data.__len__()):
+        if cell_data[num].__len__() > maxt:
+            maxt = cell_data[num].__len__()
+    for idx in range(0,maxt):
+        for num in range(0,cell_data.__len__()):
+            if idx < cell_data[num].__len__():
+                stg += str(cell_data[num][idx]) 
+            stg+="\t"
+        stg+='\n'
+    pyperclip.copy(stg)
+    spam = pyperclip.paste()

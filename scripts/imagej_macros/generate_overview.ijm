@@ -1,15 +1,23 @@
 //This script generates an overview image of a dataset.
 
+srcdir = "/Volumes/Dominic/2021_01_22_0004_20x_air/";
+img_size = 1024;// for 20x
+pxsz = 665.60/1024;
 
-srcdir = "/Users/dwaithe/Documents/collaborators/WaitheD/micro_vision/acquisitions/slide1/";
-FolderList = getFileList(srcdir); 
 
-xCoords = newArray(FolderList.length);
-yCoords = newArray(FolderList.length);
-xCoords_val = newArray(FolderList.length);
-yCoords_val = newArray(FolderList.length);
-img_size = 512;
-pxsz = 0.26;
+//srcdir = "//Volumes/Dominic/2021_01_22_0005_40x_air/";
+//img_size = 1024; //for 100x
+//pxsz = 332/1024;
+
+setBatchMode("hide");
+
+srcdir = "/media/nvidia/Dominic/0005/";
+
+
+
+img_size = 1024;
+pxsz =332.80/1024;
+
 
 c =0
 for (k=0; k<FolderList.length; k++) { 
@@ -82,9 +90,11 @@ yCoords_val = Array.trim(yCoords_val, c);
 	//print(sizeX,sizeY);
 	sizeX = round((sizeX/pxsz)+img_size);
 	sizeY = round((sizeY/pxsz)+img_size);
+
 print(sizeX,sizeY);
-exit();
+
 	newImage("out", "8-bit black", sizeX, sizeY, 1);
+
 //exit();	
 //print("minX",minX,"minY",minY);
 for (k=0; k<xCoords.length; k++) { 
@@ -100,7 +110,7 @@ for (k=0; k<xCoords.length; k++) {
 	print(ex,'\t',nSlices,'\t',a);
 	
 	
-	run("Z Project...", "projection=[Max Intensity]");
+	//run("Z Project...", "projection=[Max Intensity]");
 	run("Remove Overlay");
 	//run("Flatten");
 	run("Flip Horizontally");
@@ -108,9 +118,10 @@ for (k=0; k<xCoords.length; k++) {
 	run("Select All");
 	run("Specify...", "width="+(img_size)+" height="+(img_size)+" x=0 y=0");
 	run("Copy");
+	//exit()
 	
 	selectWindow("out");
-	setPasteMode("Add");
+	setPasteMode("Replace");
 	
 	//print("minX",minX,"minY",minY);
 	xco = ((xCoords[k]-minX)/pxsz);
@@ -125,6 +136,7 @@ for (k=0; k<xCoords.length; k++) {
 	close("MAX_img_stk_x_"+xCoords_val[k]+"y_"+yCoords_val[k]+"-1.tif");
 	//exit();
 }
+setBatchMode("show");
 run("Select All");
 //run("Flip Horizontally");
 rename("out_minX"+minX+"_minY"+minY);
