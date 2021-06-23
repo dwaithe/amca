@@ -16,15 +16,15 @@ def saveas_imagej_tiff(im_stk, stack_rois,d):
 	for regions,z in stack_rois:
 		for reg in regions:
 							
-			r0 = np.clip(reg[0],0,width)
-			r1 = np.clip(reg[1],0,height)
-			r2 = np.clip(reg[2],0,width)
-			r3 = np.clip(reg[3],0,height)
+			r0 = np.clip(reg[0],0,width)#check that it is not negative
+			r1 = np.clip(reg[1],0,height)#check that it is not negative
+			r2 = reg[2]
+			r3 = reg[3]
 			roi_b = Roi(r0,r1,r2,r3, width,height,0)
 			roi_b.name = "Region-1-p-"+str(reg[4])
 			roi_b.roiType = 1
 			if d.ch_to_save == 1:
-				roi_b.setPosition(z)
+				roi_b.setPosition(z+1)
 			else:
 				roi_b.setPositionH(1,z+1,-1) #channel, sliceZ, frame
 				

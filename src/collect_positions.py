@@ -18,7 +18,7 @@ sarea_w = [3000.,0.,-3000.,0] #um 8000 for slide 3000 for low bead 1000 for high
 sarea_h = [0.,3000.,0.,-3000.] #um
 sindex = 0
 random_sampling = True
-random_locations = 20 #How many positions to take from set if random.
+random_locations = 40 #How many positions to take from set if random.
 
 #Initialize XY stage
 ms = MS2000(which_port='/dev/ttyUSB0', verbose=False)

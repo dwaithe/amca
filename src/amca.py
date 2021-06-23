@@ -363,9 +363,13 @@ def analyzeAndMove(detections):
 			d.z_index = 1
 		else:
 			#This is the first time this image is seen but there are no regions detected. so we do nothing here and skip to next location
-			d.pos_index += 1
+			#d.pos_index += 1
 			d.img_stk = {}
 			d.description = {}
+			#And we don't comeback.
+			d.pos_x.pop(d.pos_index)
+			d.pos_y.pop(d.pos_index)
+			d.pos_z.pop(d.pos_index)
 			pass
 
 	else:
@@ -390,20 +394,22 @@ def analyzeAndMove(detections):
 					d.scanning_up = False
 					d.naive = True
 					d.z_index = 1
-					d.pos_index += 1
+					
 
-					names = []
+					d.names = []
 					for name in d.img_stk:
-						names.append(float(name))
-					names.sort()
+						d.names.append(float(name))
+					d.names.sort()
 
 					## Numpy stack of the correct size.
-					np_stk = np.zeros((1,len(names),d.ch_to_save,d.lim_max_y,d.lim_max_x)).astype(d.exp_depth)
+					np_stk = np.zeros((1,len(d.names),d.ch_to_save,d.lim_max_y,d.lim_max_x)).astype(d.exp_depth)
 					z = 0
 					
 					lets_get_meta = []
 					stack_rois = []
-					for name in names:
+					
+					
+					for name in d.names:
 						for ch in range(0,d.ch_to_save):
 							np_stk[0,z,ch,:,:] = d.img_stk[name][ch].astype(d.exp_depth)
 						stack_rois.append([d.regions[name],z])
@@ -416,6 +422,46 @@ def analyzeAndMove(detections):
 						save_img_out.saveas_imagej_tiff(np_stk, stack_rois,d)
 					elif d.save_out == "ome_tiff":
 						save_img_out.saveas_ome_tiff(np_stk, stack_rois,d)
+					
+					##Detects if cells are centred or not. If there are no in center of scene we don't want to image for timeseries.
+					count = 0
+					valid_z_pos = []
+					probs_arr = []
+					for regions,z in stack_rois:
+						probs = []
+						for reg in regions:
+											
+							r0 = reg[0]
+							r1 = reg[1]
+							r2 = reg[2]
+							r3 = reg[3]
+							prob = reg[4]
+					
+						
+							if r0 > 30 and r1 >30 and r0+r2 <d.lim_max_x -30 and r1+r3 < d.lim_max_y -30:
+								print('lims',r0,r1,r2,r3)
+								
+								count +=1
+								probs.append(prob)
+						if probs.__len__()>0:
+							probs_arr.append(np.average(probs))
+						else:
+							probs_arr.append(0)
+						valid_z_pos.append(d.names[z])
+					if count ==0:
+						print('All the cells are at the edge. So skipping in future')
+						d.pos_x.pop(d.pos_index)
+						d.pos_y.pop(d.pos_index)
+						d.pos_z.pop(d.pos_index)
+					else:
+						if valid_z_pos.__len__()>2:
+							d.pos_z[d.pos_index] = valid_z_pos[np.argmax(probs_arr)]
+							print('full range',probs_arr,np.argmax(probs_arr))
+							print('best middle',valid_z_pos[np.argmax(probs_arr)])
+						else:
+							pass #We just stick with existing zpos if only a few valid detections.
+						d.pos_index += 1
+						
 					
 					d.img_stk = {}
 					d.regions = {}
@@ -437,7 +483,9 @@ def analyzeAndMove(detections):
 		d.on_move(d.pos_x[d.pos_index],d.pos_y[d.pos_index],d.pos_z[d.pos_index]+move)
 		d.z_index += 1
 	if d.naive == False and d.scanning_down == True:
-
+		
+		
+		
 		move = d.z_stage_move * d.z_index
 		d.on_move(d.pos_x[d.pos_index],d.pos_y[d.pos_index],d.pos_z[d.pos_index]-move)
 		d.z_index += 1
@@ -511,7 +559,9 @@ if __name__ == '__main__':
 	d.num_of_tpts = 6*48 #Total number of timepoints.
 	d.mins_int = 10.0 #Time (minutes) to wait between each interval.
 	d.int_for_refocus = 6 #Interval for recalculating focus (e.g. 6 represents on every sixth timepoint).
-	d.focus_count = 10 #Number of slices above to acquire and number of slices below to acquire for initial focus.
+	
+	
+	d.focus_count = 9 #Number of slices above to acquire and number of slices below to acquire for initial focus.
 	
 	
 	###Just some tests before we engage.
@@ -557,8 +607,12 @@ if __name__ == '__main__':
 	
 	
 	starttime = time.time()
-	for tp in range(0,d.num_of_tpts):
-		if tp % d.int_for_refocus == 0 or tp == 0:
+	for tp in range(-1,d.num_of_tpts):
+		if tp == -1:
+			print('run refocus')
+			
+			d.analysis_method = 'object'
+		elif tp % d.int_for_refocus == 0 or tp == 0:
 			print('run refocus')
 			
 			d.analysis_method = 'Focus'
@@ -738,7 +792,7 @@ if __name__ == '__main__':
 				print('Session complete. Time taken (min): '+str(np.round((time.time()-tfull)/60,3)))
 				break;
 		
-		if tp == 0:
+		if tp <1:
 			
 			pass
 			
