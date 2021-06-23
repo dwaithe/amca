@@ -217,21 +217,26 @@ training_images=0
 testing_images=11
 cell_class="cell - cos7 nucleopore"
 
-#cho cells with Lonnie Swift.
+#cho (mislabbled as cho) cells with Lonnie Swift.
 dataset=31
 dir="cho_dapi_class/2020/"
 training_images=50
 testing_images=50
 cell_class="cell - cho dapi"
 
-#cho cells with Lonnie Swift.
+#U20S (mislabbled as cho) cells with Lonnie Swift.
 dataset=32
 dir="cho_rfp_pcna_class/2020/"
 training_images=50
 testing_images=50
 cell_class="cell - cho rfp pcna"
 
-
+#U2OS lives cells with Lonnie Swift.
+dataset=33
+dir="USO2_rfp_pcna_live_class/2021/"
+training_images=118
+testing_images=50
+cell_class="cell - USO2 rfp pcna live"
 
 
 

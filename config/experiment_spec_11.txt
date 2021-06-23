@@ -6,8 +6,6 @@
 
 out_file_log="cho_cells" 
 
-
-#start #cho_cells_dapi
 faster_rcnn_model_init=""
 darknet2_model_init="darknet19_448.conv.23"
 darknet3_model_init="darknet53.conv.74"
