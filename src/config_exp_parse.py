@@ -34,7 +34,7 @@ def parse_acquisition_def(path):
 	commands['output_positions_name']= None
 	commands['exp_depth']= None
 	
-	commands['dkrepo']= None
+	commands['model_repo']= None
 	commands['algorithm_name']= None
 	commands['config_path']= None
 	commands['meta_path']= None
@@ -100,7 +100,7 @@ def parse_acquisition_def(path):
 				elif chunk == 'exp_depth': 
 					if value == 'np.uint16':
 						commands['exp_depth'] = np.uint16
-				elif chunk == 'dkrepo':commands['dkrepo'] = str(value).replace('"', '').replace("'", '')
+				elif chunk == 'model_repo':commands['model_repo'] = str(value).replace('"', '').replace("'", '')
 				elif chunk == 'algorithm_name':commands['algorithm_name'] = str(value).replace('"', '').replace("'", '')
 				elif chunk == 'config_path':commands['config_path'] = str(value).replace('"', '').replace("'", '')
 				elif chunk == 'meta_path':commands['meta_path'] = str(value).replace('"', '').replace("'", '')

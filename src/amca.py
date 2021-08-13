@@ -16,11 +16,10 @@ See README.md for installation instructions before running.
 import argparse
 import os
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
 import tifffile
 import sys
-import time
+import time 
 import socket
 import platform
 import git
@@ -28,10 +27,8 @@ import git
 #For parsing the experimental configs, getting presets for each experiment.
 from config_exp_parse import parse_acquisition_def
 
-#darknet3AB import
-sys.path.append("../../darknet3AB/darknet")
-import darknet as dk
-import darknet_video as dkv
+
+
 
 
 #Stage control.
@@ -47,7 +44,7 @@ from pyvcam import pvc
 from pyvcam.camera import Camera
 
 #For focus prediction
-from microscopeimagequality import prediction
+#from microscopeimagequality import prediction
 
 
 
@@ -57,7 +54,6 @@ ms = MS2000(which_port='/dev/ttyUSB0', verbose=False)
 xyz = XYZStage(ms2000_obj=ms, axes=('X', 'y'),verbose=False)
 
 
-#plt.ion()
 class DynamicUpdate():
 	def __init__(self):
 
@@ -144,28 +140,42 @@ class DynamicUpdate():
 		
 		d.detect_coords = []
 		for detection in detections:
-			if self.analysis_method == 'object':
-				x = (float(detection[2][0])/d.output_wid)*self.lim_max_x
-				y = (float(detection[2][1])/d.output_hei)*self.lim_max_y
-				w = (float(detection[2][2])/d.output_wid)*self.lim_max_x
-				h = (float(detection[2][3])/d.output_hei)*self.lim_max_y
-			elif(self.analysis_method == 'Crop'):
-				x = self.clim_min_x + (float(detection[2][0])/d.output_wid)*(self.clim_max_x-self.clim_min_x)
-				y = self.clim_min_y + (float(detection[2][1])/d.output_hei)*(self.clim_max_y-self.clim_min_y)
-				w = (float(detection[2][2])/d.output_wid)*(self.clim_max_x-self.clim_min_x)
-				h = (float(detection[2][3])/d.output_hei)*(self.clim_max_y-self.clim_min_y)
-			xmin = int(round(x - (w / 2)))
-			xmax = int(round(x + (w / 2)))
-			ymin = int(round(y - (h / 2)))
-			ymax = int(round(y + (h / 2)))
-			score = detection[1]
+			if d.algorithm_name == 'apoNet' or d.algorithm_name == 'apoNetTensorrt':
+				x = detection[0]
+				y = detection[1]
+				w = detection[2]-x
+				h = detection[3]-y
+				xmin = x
+				ymin = y
+				xmax = detection[2]
+				ymax = detection[3]
+				score = detection[4]
+				_class =detection[5]
+				focus = detection[6]
+				features = detection[7]
+			elif d.algorithm_name == 'YOLOv2 Darknet3+MIQ' or d.algorithm_name == 'YOLOv2 Darknet3':
+				if self.analysis_method == 'object':
+					x = (float(detection[2][0])/d.output_wid)*self.lim_max_x
+					y = (float(detection[2][1])/d.output_hei)*self.lim_max_y
+					w = (float(detection[2][2])/d.output_wid)*self.lim_max_x
+					h = (float(detection[2][3])/d.output_hei)*self.lim_max_y
+				elif(self.analysis_method == 'Crop'):
+					x = self.clim_min_x + (float(detection[2][0])/d.output_wid)*(self.clim_max_x-self.clim_min_x)
+					y = self.clim_min_y + (float(detection[2][1])/d.output_hei)*(self.clim_max_y-self.clim_min_y)
+					w = (float(detection[2][2])/d.output_wid)*(self.clim_max_x-self.clim_min_x)
+					h = (float(detection[2][3])/d.output_hei)*(self.clim_max_y-self.clim_min_y)
+				xmin = int(round(x - (w / 2)))
+				xmax = int(round(x + (w / 2)))
+				ymin = int(round(y - (h / 2)))
+				ymax = int(round(y + (h / 2)))
+				score = detection[1]
 			d.detect_coords.append([x,y,w,h,xmin,xmax,ymin,ymax,score])
 			pt1 = (xmin, ymin)
 			pt2 = (xmax, ymax)
 			
 			if self.display_out: cv2.rectangle(frame, pt1,pt2, (0,255,0),1)
 			
-			self.regions[self.stage_pos_z].append([xmin,ymin,w,h,score])
+			self.regions[self.stage_pos_z].append([xmin,ymin,w,h,score,_class,focus,features])
 
 			xoutpos = self.voxel_xy*xmin
 			youtpos = self.voxel_xy*ymin
@@ -188,9 +198,12 @@ class DynamicUpdate():
 		xyz.move(x_um = self.stage_pos_x, y_um = self.stage_pos_y, blocking=False)
 		zpi._send_command('zmove_only',self.stage_pos_z)
 
-def imageOnlyAndMove():
+def imageOnlyAndMove(detections):
 
-	
+	d.names = []
+			
+	d.on_running(detections)
+
 	d.pos_index += 1				
 	lets_get_meta = []
 	_zpos = []
@@ -205,16 +218,19 @@ def imageOnlyAndMove():
 	
 	print('len',_zpos)
 	z =0
+	stack_rois = []
 	for zp in _zpos:
 		for ch in range(0,d.ch_to_save):
 			np_stk[0,z,ch,:,:] = d.img_stk[zp][ch].astype(d.exp_depth)
-			
+		stack_rois.append([d.regions[zp],z])
 		z +=1
+
+	
 	
 	if d.save_out == "ij_tiff":
-		save_img_out.saveas_imagej_tiff(np_stk, [],d)
+		save_img_out.saveas_imagej_tiff(np_stk, stack_rois,d)
 	elif d.save_out == "ome_tiff":
-		save_img_out.saveas_ome_tiff(np_stk, [],d)
+		save_img_out.saveas_ome_tiff(np_stk, stack_rois,d)
 			
 	d.img_stk = {}
 	
@@ -228,19 +244,31 @@ def imageOnlyAndMove():
 	
 		
 	return True
-def focusAndMove(score):
+def focusAndMove(score,detections):
 	"""Will measure focus score in each position, and control up/down direction. Finally, saves best focus position"""
 	
 	delay = False
-	
+	d.on_running(detections)
 	if d.naive == True:
-		#This is the first time this image is seen and we have detected regions. 
-		d.naive = False
-		d.scanning_up = True
-		d.scanning_down = False
-		d.count = 0
-		d.z_index = 1
-		d.scores.append(score)
+		if len(d.detect_coords) > 0:
+
+			#This is the first time this image is seen and we have detected regions. 
+			d.naive = False
+			d.scanning_up = True
+			d.scanning_down = False
+			d.count = 0
+			d.z_index = 1
+			d.scores.append(score)
+		else:
+			#This is the first time this image is seen but there are no regions detected. so we do nothing here and skip to next location
+			#d.pos_index += 1
+			d.img_stk = {}
+			d.description = {}
+			#And we don't comeback.
+			d.pos_x.pop(d.pos_index)
+			d.pos_y.pop(d.pos_index)
+			d.pos_z.pop(d.pos_index)
+			pass
 	else:
 		current_min = np.min(d.scores)
 		print('score',score,current_min)
@@ -291,7 +319,7 @@ def focusAndMove(score):
 				for name in names_ordered:
 					for ch in range(0,d.ch_to_save):
 						np_stk[0,z,ch,:,:] = d.img_stk[name][ch].astype(d.exp_depth)
-					#stack_rois.append([d.regions[name],z])
+					stack_rois.append([d.regions[name],z])
 							
 					z+=1
 				###This is where we update the focus.
@@ -299,12 +327,37 @@ def focusAndMove(score):
 					print('The best focus, for this section is at the limit. No permitting to go further. z-pos:',d.best_focus,' um')
 				else:
 					d.pos_z[d.pos_index] = d.best_focus
+				count = 0
+				for regions,z in stack_rois:
+					
+					for reg in regions:
+										
+						r0 = reg[0]
+						r1 = reg[1]
+						r2 = reg[2]
+						r3 = reg[3]
+						
+				
+					
+						if r0 > 30 and r1 >30 and r0+r2 <d.lim_max_x -30 and r1+r3 < d.lim_max_y -30:
+							print('lims',r0,r1,r2,r3)
+							
+							count +=1
+							
+					
+				if count ==0:
+					print('All the cells are at the edge. So skipping in future')
+					d.pos_x.pop(d.pos_index)
+					d.pos_y.pop(d.pos_index)
+					d.pos_z.pop(d.pos_index)
+				else:
+					d.pos_index += 1
 				
 				
 				
 					
 				print('write file')
-				d.pos_index += 1
+				
 				if d.save_out == "ij_tiff":
 					save_img_out.saveas_imagej_tiff(np_stk, stack_rois,d)
 				elif d.save_out == "ome_tiff":
@@ -321,12 +374,10 @@ def focusAndMove(score):
 		d.on_move(d.pos_x[d.pos_index],d.pos_y[d.pos_index],d.pos_z[d.pos_index])
 		time.sleep(3)
 	if d.naive == False and d.scanning_up == True:
-
 		move = d.z_stage_move * d.z_index
 		d.on_move(d.pos_x[d.pos_index],d.pos_y[d.pos_index],d.pos_z[d.pos_index]+move)
 		d.z_index += 1
 	if d.naive == False and d.scanning_down == True:
-
 		move = d.z_stage_move * d.z_index
 		d.on_move(d.pos_x[d.pos_index],d.pos_y[d.pos_index],d.pos_z[d.pos_index]-move)
 		d.z_index += 1
@@ -569,32 +620,109 @@ if __name__ == '__main__':
 	assert d.ch_to_save <= d.ch_to_image, "please define channels to save as <= channels to image."
 	
 	d.init_camera()
-	if params['dkrepo'] != "":
-		d.dkrepo = git.Repo(params['dkrepo']).head.object.hexsha
+	if params['model_repo'] != "":
+		d.model_repo = git.Repo(params['model_repo']).head.object.hexsha
 	else:
-		d.dkrepo = ""
+		d.model_repo = ""
 	
 	d.algorithm_name = params['algorithm_name']#"YOLOv2 Darknet3 "
 	d.config_path = params['config_path']#"../../darknet3AB/darknet/cfg/yolov2_dk3AB-classes-1-flip.cfg"
 	d.meta_path =  params['meta_path']#"../../cell_datasets/cho_dapi_class/2020/obj_cho_dapi_class50.data"
 	d.weight_path = params['weight_path']#"../../models/darknet/cho_dapi_class50/yolov2_dk3AB-classes-1-flip_final.weights" 
 	
+	#if d.algorithm_name == 'apoNet':
+
+
 	
-	
-	focus_weight_path = "/home/nvidia/Documents/models/focus_model/model.ckpt-1000042"
-	focus_model = prediction.ImageQualityClassifier(focus_weight_path,84,11)
+	if d.algorithm_name == 'YOLOv2 Darknet3+MIQ':
+		focus_weight_path = "/home/nvidia/Documents/models/focus_model/model.ckpt-1000042"
+		focus_model = prediction.ImageQualityClassifier(focus_weight_path,84,11)
 	
 	d.load_positions(d.positions_file_path)
 	d.init_output_positions()
 	
 	### Loads the network in.
-	if params['algorithm_name'] != "": 
+	if d.algorithm_name == 'YOLOv2 Darknet3' or d.algorithm_name == 'YOLOv2 Darknet3+MIQ' : 
+		#darknet3AB import
+		sys.path.append("../../darknet3AB/darknet")
+		import darknet as dk
+		import darknet_video as dkv
+
 		netMain = dk.load_net_custom(d.config_path.encode("ascii"), d.weight_path.encode("ascii"), 0, 1)
 		metaMain = dk.load_meta(d.meta_path.encode("ascii"))
 		
 		d.output_wid = dk.network_width(netMain)
 		d.output_hei = dk.network_height(netMain)
 		darknet_image = dk.make_image(d.output_wid,d.output_hei,3)
+
+	if d.algorithm_name == "apoNet":
+		import torch
+		import csv
+		sys.path.append("../../apoNet/")
+
+
+		torch.backends.cudnn.enabled = True
+		torch.backends.cudnn.benchmark = True
+		torch.backends.cudnn.deterministic = False
+		torch.backends.cudnn.enabled = True
+
+		import pred_stack as ps
+
+		#Initialise model and collect classes.
+		with open(d.meta_path, 'r') as f:
+			classes = ps.load_classes(csv.reader(f, delimiter=','))
+
+		labels = {}
+		for key, value in classes.items():
+			labels[value] = key
+
+		d.model = torch.load(d.weight_path)
+		use_gpu = True
+
+		d.model = d.model.cuda()
+
+		if torch.cuda.is_available():
+			#retinanet.load_state_dict(torch.load(parser.model_path))
+			d.model = torch.nn.DataParallel(d.model).cuda()
+		else:
+			retinanet.load_state_dict(torch.load(parser.model_path))
+			retinanet = torch.nn.DataParallel(d.model)
+
+		
+
+		
+
+		d.model.training = False
+		d.model.eval()
+		d.model.module.freeze_bn()
+	if d.algorithm_name == "apoNetTensorrt":
+		import torch
+		import csv
+		sys.path.append("../../apoNet/")
+
+
+		import pred_stack as ps
+
+		import onnxtensorrt_run as rt_run
+
+		#Initialise model and collect classes.
+		with open(d.meta_path, 'r') as f:
+			classes = ps.load_classes(csv.reader(f, delimiter=','))
+
+		labels = {}
+		for key, value in classes.items():
+			labels[value] = key
+
+
+		engine = rt_run.init_onnx_tensorrt(d.weight_path)
+
+		d.model = engine
+
+		
+
+
+
+
 	im = np.zeros((d.lim_max_y,d.lim_max_x,3)).astype(np.uint8)
 	spa_sam = d.digital_binning 
 	
@@ -607,7 +735,7 @@ if __name__ == '__main__':
 	
 	
 	starttime = time.time()
-	for tp in range(-1,d.num_of_tpts):
+	for tp in range(0,d.num_of_tpts):
 		if tp == -1:
 			print('run refocus')
 			
@@ -661,7 +789,8 @@ if __name__ == '__main__':
 				if spa_sam == 1:
 					frame_CH3 = CH3
 				else:
-					
+					A
+
 					frame_CH3 = CH3[0::spa_sam,0::spa_sam]
 					frame_CH3 += CH3[0::spa_sam,1::spa_sam]
 					frame_CH3 += CH3[1::spa_sam,0::spa_sam]
@@ -696,23 +825,26 @@ if __name__ == '__main__':
 				im[:,:,2] =frame_CH3_n
 				
 			if d.analysis_method == 'object':
-				
-				###Converted into correct dimension for darknet.	
-				frame_resized = cv2.resize(im,(dk.network_width(netMain),dk.network_height(netMain)),interpolation=cv2.INTER_LINEAR)
-				dk.copy_image_from_bytes(darknet_image,frame_resized.tobytes())
-				
-				 
-				
 				t3 = time.time()
-				detections = dk.detect_image(netMain, metaMain, darknet_image, thresh=0.50)
+
+				if d.algorithm_name == 'YOLOv2 Darknet3' or d.algorithm_name == 'YOLOv2 Darknet3+MIQ' : 
+					###Converted into correct dimension for darknet.	
+					frame_resized = cv2.resize(im,(dk.network_width(netMain),dk.network_height(netMain)),interpolation=cv2.INTER_LINEAR)
+					dk.copy_image_from_bytes(darknet_image,frame_resized.tobytes())
+					detections = dk.detect_image(netMain, metaMain, darknet_image, thresh=0.50)
+				if d.algorithm_name == 'apoNetTensorrt':
+					tz = time.time()
+					detections = ps.evaluate_image(im,d.model,labels)
+					print(time.time()-tz)
 				if len(detections) > 0:
-					#Save image to stack.
-					if d.ch_to_save == 1:
-						d.img_stk[d.stage_pos_z] = [frame_CH1]
-					if d.ch_to_save == 2:
-						d.img_stk[d.stage_pos_z] = [frame_CH1,frame_CH2]
-					if d.ch_to_save == 3:
-						d.img_stk[d.stage_pos_z] = [frame_CH1,frame_CH2,frame_CH3]
+						#Save image to stack.
+						if d.ch_to_save == 1:
+							d.img_stk[d.stage_pos_z] = [frame_CH1]
+						if d.ch_to_save == 2:
+							d.img_stk[d.stage_pos_z] = [frame_CH1,frame_CH2]
+						if d.ch_to_save == 3:
+							d.img_stk[d.stage_pos_z] = [frame_CH1,frame_CH2,frame_CH3]
+
 				t4 = time.time()
 				out = analyzeAndMove(detections)
 				t5 =time.time()
@@ -720,6 +852,10 @@ if __name__ == '__main__':
 			if d.analysis_method == 'None':
 				t3 = time.time()
 				#Save image to stack.
+				if d.algorithm_name == 'apoNet':
+					tz = time.time()
+					detections = ps.evaluate_image(im,d.model,labels)
+					print(time.time()-tz)
 				if d.ch_to_save == 1:
 					d.img_stk[d.stage_pos_z] = [frame_CH1]
 				if d.ch_to_save == 2:
@@ -727,7 +863,7 @@ if __name__ == '__main__':
 				if d.ch_to_save == 3:
 					d.img_stk[d.stage_pos_z] = [frame_CH1,frame_CH2,frame_CH3]
 				t4 = time.time()
-				out = imageOnlyAndMove()
+				out = imageOnlyAndMove(detections)
 				t5 = time.time()
 			if d.analysis_method == 'Focus':
 				if d.ch_to_analyze == 1:
@@ -737,13 +873,24 @@ if __name__ == '__main__':
 					imt = frame_CH2	
 				
 				elif d.ch_to_analyze.__len__() == 3:
-					imt = frame_CH3 
-				
-				focus_vals = focus_model.get_patch_predictions(imt)
-				score = 0
-				for val in focus_vals:
-					opa = val[4].predictions
-					score += opa
+					imt = frame_CH3
+
+				if d.algorithm_name == 'YOLOv2 Darknet3+MIQ' :
+					focus_vals = focus_model.get_patch_predictions(imt)
+					score = 0
+					for val in focus_vals:
+						opa = val[4].predictions
+						score += opa
+
+				if d.algorithm_name =='apoNetTensorrt':
+					
+					detections = ps.evaluate_image(im,d.model,labels)
+					score = 0
+					for detect in detections:
+						score+=detect[6]
+					print('focus score',score)
+					
+
 				
 				t3 = time.time()
 				#Save image to stack.
@@ -754,7 +901,7 @@ if __name__ == '__main__':
 				if d.ch_to_save == 3:
 					d.img_stk[d.stage_pos_z] = [frame_CH1,frame_CH2,frame_CH3]
 				t4 = time.time()
-				out = focusAndMove(score)
+				out = focusAndMove(score,detections)
 				t5 = time.time()
 			if d.analysis_method == 'Crop':
 				
