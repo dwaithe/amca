@@ -24,7 +24,11 @@ def get_experiment_parameters(path_to_amca_config,exp_id):
 	test_array = []
 	rep_array = []
 	flip_on_array = []
-	
+	focus_mode_array = []
+	psf_width_pixels_array = []
+	z_depth_meters_array = []
+	focus_levels_array = []
+	depth_of_network_array = []
 	
 	while 1:
 		line = f.readline()
@@ -48,18 +52,24 @@ def get_experiment_parameters(path_to_amca_config,exp_id):
 				models['darknet3_model_init'] =line[20:].strip("\"")
 				line = next_line()
 			if line[0:21] == "retinanet_model_init=":
-				models['retinanet_model_init_model_init'] =line[21:].strip("\"")
+				models['retinanet_model_init'] =line[21:].strip("\"")
 				line = next_line()
 			model_array.append(models)
+			if line[0:17] == "depth_of_network=":
+				depth_of_network_array.append(line[17:].strip("\"").strip("\'"))
+			line = next_line()
 			
 			
 
 			if line[0:17] == "train_on_dataset=":
 				train_array.append(line[17:].strip("\"").strip("\'"))
 			line = next_line()
+			if line[0:11] == "focus_mode=":
+				focus_mode_array.append(line[11:].strip("\"").strip("\'"))
+			line = next_line()
 
 			if line[0:8] == "classes=":
-				classes.append(line[8:])
+				classes.append(line[8:].strip("\"").strip("\'"))
 			line = next_line()
 			
 			if line[0:8] == "flip_on=":
@@ -70,7 +80,12 @@ def get_experiment_parameters(path_to_amca_config,exp_id):
 			while line[0:22] != "number_of_repetitions=":
 				if line[0:16] == "test_on_dataset=":
 					temp_test_array.append(line[16:].strip("\"").strip("\'").split(","))
-				print( temp_test_array)
+				if line[0:17] == "psf_width_pixels=":
+					psf_width_pixels_array.append(line[17:].strip("\"").strip("\'"))
+				if line[0:15] == "z_depth_meters=":
+					z_depth_meters_array.append(line[15:].strip("\"").strip("\'"))
+				if line[0:13] == "focus_levels=":
+					focus_levels_array.append(line[13:].strip("\"").strip("\'"))
 				line = next_line()
 			test_array.append(temp_test_array)
 			if line[0:22] == "number_of_repetitions=":
@@ -78,30 +93,62 @@ def get_experiment_parameters(path_to_amca_config,exp_id):
 			
 			
 			if model_array.__len__() == train_array.__len__() == rep_array.__len__() == test_array.__len__() == flip_on_array.__len__() == classes.__len__():
-				
+				pass
+			elif focus_mode_array.__len__() == psf_width_pixels_array.__len__() == z_depth_meters_array.__len__() == focus_levels_array.__len__():
 				pass
 			else:
 				print('failed\n')
 				print('One of your datasets was not complete:',model_array.__len__())
-				print('Please make sure you have the following structure, e.g:')
-				print('start #Erythroid dataset all the cells.')
+				print('start #Erythroblast dapi class')
 				print('faster_rcnn_model_init=""')
-				print('darknet2_model_init="/home/molimm2/dwaithe/object_detection/darknet2/darknet19_448.conv.23"')
-				print('darknet3_model_init="/home/molimm2/dwaithe/object_detection/darknet3/darknet53.conv.74"')
-				print('retinanet_model_init=""')
-				print('	train_on_dataset="dataset15"')
-				print('	classes=1')
-				print('	flip_on=True')
-				print('	test_on_dataset="dataset15"')
-				print('	number_of_repetitions=3')
+				print('darknet2_model_init="darknet19_448.conv.23"')
+				print('darknet3_model_init="darknet53.conv.74"')
+				print('retinanet_model_init="../../models/pytorch/erythroblast_dapi_class80/modal_final.pt"')
+				print('depth_of_network="50"')
+				print('train_on_dataset=""')
+				print('focus_mode=True')
+				print('classes=1')
+				print('flip_on=True')
+				print('test_on_dataset="dataset8"')
+				print('psf_width_pixels="51"')
+				print('z_depth_meters="584e-9"')
+				print('focus_levels="10"')
+				print('number_of_repetitions=1')
 				assert False
-	print('model_array', test_array)
-	return model_array, train_array, test_array, rep_array, flip_on_array, classes, out_file_log
+	
+	exp_param = {}
+	
+	exp_param['model_array'] = model_array
+	exp_param['train_on_dataset'] = train_array
+	exp_param['test_on_dataset'] = test_array
+	exp_param['rep_array'] = rep_array
+	exp_param['depth_of_network'] = depth_of_network_array
+	exp_param['flip_on_array'] = flip_on_array
+	exp_param['focus_mode'] = focus_mode_array
+	exp_param['classes'] = classes
+	exp_param['out_file_log'] = out_file_log
+	exp_param['psf_width_pixels'] = psf_width_pixels_array
+	exp_param['z_depth_meters'] = z_depth_meters_array
+	exp_param['focus_levels'] = focus_levels_array
+	
+
+
+	return exp_param
 def load_dataset(path_to_data,path_to_amca_config,dataset):
 	
 	if dataset[0:7] == 'dataset':
 		path_to_spec = path_to_amca_config+"dataset_spec.txt"
-		indices, datasets, datasets_size, datasets_class = cvto.return_dataset_spec(path_to_spec) 
+		blk_dataset_param = cvto.return_dataset_spec(path_to_spec)
+
+		indices = blk_dataset_param['indices']
+		datasets = blk_dataset_param['datasets']
+		datasets_size = blk_dataset_param['datasets_size']
+		datasets_class = blk_dataset_param['datasets_class']
+		pixel_size_meters_arr = blk_dataset_param['pixel_size_meters_arr']
+		wavelength_arr = blk_dataset_param['wavelength_arr']
+		num_aperture_arr = blk_dataset_param['num_aperture_arr']
+		refractive_ind_arr = blk_dataset_param['refractive_ind_arr']
+		
 		idx = int(dataset[7:].strip("\""))
 		print(idx,indices)
 		c = 0
@@ -112,6 +159,10 @@ def load_dataset(path_to_data,path_to_amca_config,dataset):
 				dataset_dir = datasets[c]
 				dataset_size = datasets_size[c]
 				dataset_class = datasets_class[c]
+				pixel_size_meters = pixel_size_meters_arr[c]
+				wavelength = wavelength_arr[c]
+				num_aperture = num_aperture_arr[c]
+				refractive_ind = refractive_ind_arr[c]
 				d+=1
 			c+=1
 		assert d != 0, "A test dataset was referenced which doesn't exist."
@@ -128,7 +179,21 @@ def load_dataset(path_to_data,path_to_amca_config,dataset):
 		path_to_training_def = path_to_data+dataset_dir+"/obj_"+dn_mixed_class_name+".data"
 		path_to_class_names = path_to_data+dataset_dir+"/obj_"+dataset+".names"
 		cell_classes = get_class_names(path_to_class_names)
-		return num_of_train,year,test_set,cell_classes,dataset,path_to_training_def
+
+		
+		dataset_param = {}
+		dataset_param['num_of_train'] = num_of_train
+		dataset_param['year'] = year
+		dataset_param['test_set'] = test_set
+		dataset_param['cell_classes'] = cell_classes
+		dataset_param['dataset'] = dataset
+		dataset_param['path_to_training_def'] = path_to_training_def
+		dataset_param['pixel_size_meters'] = pixel_size_meters
+		dataset_param['wavelength'] = wavelength
+		dataset_param['num_aperture'] = num_aperture
+		dataset_param['refractive_ind'] = refractive_ind
+
+		return dataset_param
 		
 	elif dataset[0:5] == 'mixed':
 		path_to_spec = path_to_amca_config+"mixed_dataset_spec.txt"

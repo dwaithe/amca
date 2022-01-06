@@ -585,6 +585,12 @@ def return_dataset_spec(path_to_spec):
     datasets = []
     datasets_size = []
     datasets_class = []
+    pixel_size_meters_arr = []
+    wavelength_arr = []
+    num_aperture_arr = []
+    refractive_ind_arr = []
+
+
     def next_line():
         line = f.readline().strip("\n")
         while line == '':
@@ -622,17 +628,35 @@ def return_dataset_spec(path_to_spec):
 
             line = next_line()
 
-
             if line[0:11]=="cell_class=":
                 datasets_class.append(line[11:].strip('"'))
+
+            line = next_line()
+            if line[0:18]=="pixel_size_meters=":
+                pixel_size_meters_arr.append(line[18:].strip('"'))
+
+            line = next_line()
+
+            if line[0:11]=="wavelength=":
+                wavelength_arr.append(line[11:].strip('"'))
+
+            line = next_line()
+
+            if line[0:19]=="numerical_aperture=":
+                num_aperture_arr.append(line[19:].strip('"'))
+
+            line = next_line()
+
+            if line[0:17]=="refractive_index=":
+                refractive_ind_arr.append(line[17:].strip('"'))
+
                 
 
             #check:
             if indices.__len__() == datasets.__len__() == datasets_class.__len__() == datasets_size.__len__():
-                if np.unique(indices).shape[0] != indices.__len__(): 
-                    print('not unique')
-                    print("Your dataset ids are not unique e.g.(0,1,2,3,4), you have repetition.")
-                    return False, False, False, False
+                pass
+            elif pixel_size_meters_arr.__len__() == wavelength_arr.__len__() == num_aperture_arr.__len__() == refractive_ind_arr.__len__():
+                pass
 
             else:
                 print('failed\n')
@@ -646,13 +670,27 @@ def return_dataset_spec(path_to_spec):
                 print('cell_class="cell - erythroblast dapi glycophorinA"')
                 return False, False, False, False
                 break
+            if np.unique(indices).shape[0] != indices.__len__(): 
+                    print('not unique')
+                    print("Your dataset ids are not unique e.g.(0,1,2,3,4), you have repetition.")
+                    return False, False, False, False
 
 
 
     for i,c in enumerate(datasets):
         print('index:',i,'dataset',c)
+
+    blk_dataset_param = {}
+    blk_dataset_param['indices'] = indices
+    blk_dataset_param['datasets'] = datasets
+    blk_dataset_param['datasets_size'] = datasets_size
+    blk_dataset_param['datasets_class'] = datasets_class
+    blk_dataset_param['pixel_size_meters_arr'] = pixel_size_meters_arr
+    blk_dataset_param['wavelength_arr'] = wavelength_arr
+    blk_dataset_param['num_aperture_arr'] = num_aperture_arr
+    blk_dataset_param['refractive_ind_arr'] = refractive_ind_arr
     
-    return indices, datasets, datasets_size, datasets_class
+    return blk_dataset_param
 def return_mixed_dataset_spec(path_to_spec):
     f = open(path_to_spec,"r")
     indices = []

@@ -6,6 +6,10 @@ dir="neuroblastoma_phal_class/2018/"
 training_images=180
 testing_images=180
 cell_class="cell - neuroblastoma phalloidin"
+pixel_size_meters="0.300e-6"
+wavelength="525e-9"
+numerical_aperture="0.8"
+refractive_index="1.333"
 
 #neuroblastoma phalloidin class, 25 training images:
 dataset=1
@@ -13,6 +17,10 @@ dir="neuroblastoma_phal_class/2018/"
 training_images=25
 testing_images=180
 cell_class="cell - neuroblastoma phalloidin"
+pixel_size_meters="0.300e-6"
+wavelength="525e-9"
+numerical_aperture="0.8"
+refractive_index="1.333"
 
 #neuroblastoma phalloidin class, 50 training images:
 dataset=2
@@ -20,6 +28,10 @@ dir="neuroblastoma_phal_class/2018/"
 training_images=50
 testing_images=180
 cell_class="cell - neuroblastoma phalloidin"
+pixel_size_meters="0.300e-6"
+wavelength="525e-9"
+numerical_aperture="0.8"
+refractive_index="1.333"
 
 #neuroblastoma phalloidin class, 75 training images:
 dataset=3
@@ -27,6 +39,10 @@ dir="neuroblastoma_phal_class/2018/"
 training_images=75
 testing_images=180
 cell_class="cell - neuroblastoma phalloidin"
+pixel_size_meters="0.300e-6"
+wavelength="525e-9"
+numerical_aperture="0.8"
+refractive_index="1.333"
 
 #neuroblastoma phalloidin class, 100 training images:
 dataset=4
@@ -34,6 +50,10 @@ dir="neuroblastoma_phal_class/2018/"
 training_images=100
 testing_images=180
 cell_class="cell - neuroblastoma phalloidin"
+pixel_size_meters="0.300e-6"
+wavelength="525e-9"
+numerical_aperture="0.8"
+refractive_index="1.333"
 
 #neuroblastoma phalloidin class, 125 training images:
 dataset=5
@@ -41,6 +61,10 @@ dir="neuroblastoma_phal_class/2018/"
 training_images=125
 testing_images=180
 cell_class="cell - neuroblastoma phalloidin"
+pixel_size_meters="0.300e-6"
+wavelength="525e-9"
+numerical_aperture="0.8"
+refractive_index="1.333"
 
 #neuroblastoma phalloidin class, 150 training images:
 dataset=6
@@ -48,6 +72,10 @@ dir="neuroblastoma_phal_class/2018/"
 training_images=150
 testing_images=180
 cell_class="cell - neuroblastoma phalloidin"
+pixel_size_meters="0.300e-6"
+wavelength="525e-9"
+numerical_aperture="0.8"
+refractive_index="1.333"
 
 #neuroblastoma phalloidin dapi class, 180 training images:
 dataset=7
@@ -55,6 +83,10 @@ dir="neuroblastoma_phal_dapi_class/2018/"
 training_images=180
 testing_images=180
 cell_class="cell - neuroblastoma phalloidin dapi"
+pixel_size_meters="0.300e-6"
+wavelength="461e-9"
+numerical_aperture="0.8"
+refractive_index="1.333"
 
 #Erythroblast dapi class, full_data:
 dataset=8
@@ -62,6 +94,10 @@ dir="erythroblast_dapi_class/2018/"
 training_images=80
 testing_images=80
 cell_class="cell - erythroblast dapi"
+pixel_size_meters="0.250e-6"
+wavelength="461e-9"
+numerical_aperture="1.42"
+refractive_index="1.45"
 
 #Erythroblast dapi glycophorinA, full data:
 dataset=9
@@ -69,6 +105,10 @@ dir="erythroblast_dapi_glycophorinA_class/2018/"
 training_images=80
 testing_images=80
 cell_class="cell - erythroblast dapi glycophorinA"
+pixel_size_meters="0.250e-6"
+wavelength="520e-9"
+numerical_aperture="1.42"
+refractive_index="1.45"
 
 #C127 dapi class, full data:
 dataset=10
@@ -76,6 +116,10 @@ dir="c127_dapi_class/2018/"
 training_images=30
 testing_images=30
 cell_class="cell - c127 dapi"
+pixel_size_meters="0.250e-6"
+wavelength="461e-9"
+numerical_aperture="1.4"
+refractive_index="1.45"
 
 #Eukaryote dapi class, full data:
 dataset=11
@@ -83,6 +127,10 @@ dir="eukaryote_dapi_class/2018/"
 training_images=40
 testing_images=40
 cell_class="cell - eukaryote dapi"
+pixel_size_meters="0.264e-6"
+wavelength="461e-9"
+numerical_aperture="1.4"
+refractive_index="1.45"
 
 #Fibroblast nucleopore class, full data:
 dataset=12
@@ -90,6 +138,10 @@ dir="fibroblast_nucleopore_class/2018/"
 training_images=26
 testing_images=20
 cell_class="cell - fibroblast nucleopore"
+pixel_size_meters="0.250e-6"
+wavelength="580e-9"
+numerical_aperture="1.4"
+refractive_index="1.45"
 
 #Hek peroxisome class, full data, all the cells:
 dataset=13
@@ -97,6 +149,10 @@ dir="hek_peroxisome_class/2018/"
 training_images=55
 testing_images=55
 cell_class="cell - hek peroxisome"
+pixel_size_meters="0.250e-6"
+wavelength="509e-9"
+numerical_aperture="1.4"
+refractive_index="1.45"
 
 #Hek peroxisome class, full data, but only the punctuate cells:
 dataset=14
@@ -104,6 +160,10 @@ dir="hek_peroxisome_all_class/2018/"
 training_images=55
 testing_images=55
 cell_class="cell - hek peroxisome all"
+pixel_size_meters="0.250e-6"
+wavelength="509e-9"
+numerical_aperture="1.4"
+refractive_index="1.45"
 
 #Erythroid dapi class, full data, all the cells blebby and not:
 dataset=15
@@ -111,6 +171,10 @@ dir="erythroid_dapi_all_class/2019/"
 training_images=51
 testing_images=50
 cell_class="cell - erythroid dapi all"
+pixel_size_meters="0.260e-6"
+wavelength="461e-9"
+numerical_aperture="1.42"
+refractive_index="1.45"
 
 #Erythroid dapi class, full data, only the non-blebby cells:
 dataset=16
@@ -118,6 +182,10 @@ dir="erythroid_dapi_class/2019/"
 training_images=51
 testing_images=50
 cell_class="cell - erythroid dapi"
+pixel_size_meters="0.260e-6"
+wavelength="461e-9"
+numerical_aperture="1.42"
+refractive_index="1.45"
 
 #COS-7 cells class, Nuclear pore complexes: Anti-Nup with Alexa Fluor 555 F(ab')2
 dataset=17
@@ -125,6 +193,10 @@ dir="cos7_nucleopore_class/2019/"
 training_images=50
 testing_images=50
 cell_class="cell - cos7 nucleopore"
+pixel_size_meters="0.260e-6"
+wavelength="573e-9"
+numerical_aperture="1.42"
+refractive_index="1.45"
 
 #COS-7 cells class, Nuclear pore complexes: Anti-Nup with Alexa Fluor 555 F(ab')2 1x scale (double normal)
 dataset=18
@@ -132,6 +204,10 @@ dir="cos7_nucleopore_scale_1p0_class/2019/"
 training_images=50
 testing_images=50
 cell_class="cell - cos7 nucleopore"
+pixel_size_meters="0.130e-6"
+wavelength="573e-9"
+numerical_aperture="1.42"
+refractive_index="1.45"
 
 #COS-7 cells class, Nuclear pore complexes: Anti-Nup with Alexa Fluor 555 F(ab')2 0.25x scale (double normal)
 dataset=19
@@ -139,6 +215,10 @@ dir="cos7_nucleopore_scale_0p25_class/2019/"
 training_images=50
 testing_images=50
 cell_class="cell - cos7 nucleopore"
+pixel_size_meters="0.520e-6"
+wavelength="573e-9"
+numerical_aperture="1.42"
+refractive_index="1.45"
 
 #COS-7 cells class, Nuclear pore complexes: Anti-Nup with Alexa Fluor 555 F(ab')2 0.1x scale (double normal)
 dataset=20
@@ -146,6 +226,10 @@ dir="cos7_nucleopore_scale_0p1_class/2019/"
 training_images=50
 testing_images=50
 cell_class="cell - cos7 nucleopore"
+pixel_size_meters="1.300e-6"
+wavelength="573e-9"
+numerical_aperture="1.42"
+refractive_index="1.45"
 
 #C127 dapi class, full data:
 dataset=21
@@ -153,6 +237,10 @@ dir="c127_dapi_scale_1p0_class/2018/"
 training_images=30
 testing_images=30
 cell_class="cell - c127 dapi"
+pixel_size_meters="0.130e-6"
+wavelength="461e-9"
+numerical_aperture="1.42"
+refractive_index="1.45"
 
 #C127 dapi class, full data:
 dataset=22
@@ -160,6 +248,10 @@ dir="c127_dapi_scale_0p25_class/2018/"
 training_images=30
 testing_images=30
 cell_class="cell - c127 dapi"
+pixel_size_meters="0.0325e-6"
+wavelength="461e-9"
+numerical_aperture="0.6"
+refractive_index="1.45"
 
 #C127 dapi class, full data:
 dataset=23
@@ -167,6 +259,10 @@ dir="c127_dapi_scale_0p1_class/2018/"
 training_images=30
 testing_images=30
 cell_class="cell - c127 dapi"
+pixel_size_meters="1.300e-6"
+wavelength="461e-9"
+numerical_aperture="0.25"
+refractive_index="1.45"
 
 Erythroid dapi class, full data, all the cells blebby and not:
 dataset=24
@@ -174,6 +270,10 @@ dir="erythroid_dapi_all_scale_1p0_class/2019/"
 training_images=51
 testing_images=50
 cell_class="cell - erythroid dapi all"
+pixel_size_meters=""
+wavelength="461e-9"
+numerical_aperture=""
+refractive_index=""
 
 Erythroid dapi class, full data, all the cells blebby and not:
 dataset=25
@@ -181,6 +281,10 @@ dir="erythroid_dapi_all_scale_0p25_class/2019/"
 training_images=51
 testing_images=50
 cell_class="cell - erythroid dapi all"
+pixel_size_meters=""
+wavelength="461e-9"
+numerical_aperture=""
+refractive_index=""
 
 Erythroid dapi class, full data, all the cells blebby and not:
 dataset=26
@@ -188,20 +292,32 @@ dir="erythroid_dapi_all_scale_0p1_class/2019/"
 training_images=51
 testing_images=50
 cell_class="cell - erythroid dapi all"
+pixel_size_meters=""
+wavelength="461e-9"
+numerical_aperture=""
+refractive_index=""
 
-#COS-7 cells class, Nuclear pore complexes: Anti-Nup with Alexa Fluor 555 F(ab')2 10x magnificatin.
+#COS-7 cells class, Nuclear pore complexes: Anti-Nup with Alexa Fluor 555 F(ab')2 10x magnification.
 dataset=27
 dir="cos7_nucleopore_scale_10x_class/2019/"
 training_images=0
 testing_images=20
 cell_class="cell - cos7 nucleopore"
+pixel_size_meters="0.800e-6"
+wavelength="573e-9"
+numerical_aperture="0.45"
+refractive_index="1.45"
 
-#COS-7 cells class, Nuclear pore complexes: Anti-Nup with Alexa Fluor 555 F(ab')2 40x magnificatin.
+#COS-7 cells class, Nuclear pore complexes: Anti-Nup with Alexa Fluor 555 F(ab')2 40x magnification.
 dataset=28
 dir="cos7_nucleopore_scale_40x_class/2019/"
 training_images=0
 testing_images=11
 cell_class="cell - cos7 nucleopore"
+pixel_size_meters="0.200e-6"
+wavelength="573e-9"
+numerical_aperture="0.55"
+refractive_index="1.45"
 
 #COS-7 cells class, Nuclear pore complexes: Anti-Nup with Alexa Fluor 555 F(ab')2 10x magnificatin but resized and cropped.
 dataset=29
@@ -209,6 +325,10 @@ dir="cos7_nucleopore_scale_6p15_10x_class/2019/"
 training_images=0
 testing_images=19
 cell_class="cell - cos7 nucleopore"
+pixel_size_meters="0.800e-6"
+wavelength="573e-9"
+numerical_aperture="0.45"
+refractive_index="1.45"
 
 #COS-7 cells class, Nuclear pore complexes: Anti-Nup with Alexa Fluor 555 F(ab')2 40x magnificatin but resized and cropped.
 dataset=30
@@ -216,6 +336,10 @@ dir="cos7_nucleopore_scale_1p5_40x_class/2019/"
 training_images=0
 testing_images=11
 cell_class="cell - cos7 nucleopore"
+pixel_size_meters="0.200e-6"
+wavelength="573e-9"
+numerical_aperture="0.55"
+refractive_index="1.45"
 
 #cho (mislabbled as cho) cells with Lonnie Swift.
 dataset=31
@@ -223,6 +347,10 @@ dir="cho_dapi_class/2020/"
 training_images=50
 testing_images=50
 cell_class="cell - cho dapi"
+pixel_size_meters="0.260e-6"
+wavelength="583e-9"
+numerical_aperture="1.42"
+refractive_index="1.45"
 
 #U20S (mislabbled as cho) cells with Lonnie Swift.
 dataset=32
@@ -230,6 +358,10 @@ dir="cho_rfp_pcna_class/2020/"
 training_images=50
 testing_images=50
 cell_class="cell - cho rfp pcna"
+pixel_size_meters="0.260e-6"
+wavelength="583e-9"
+numerical_aperture="1.42"
+refractive_index="1.45"
 
 #U2OS lives cells with Lonnie Swift.
 dataset=33
@@ -237,6 +369,9 @@ dir="USO2_rfp_pcna_live_class/2021/"
 training_images=118
 testing_images=50
 cell_class="cell - USO2 rfp pcna live"
-
+pixel_size_meters="0.260e-6"
+wavelength="583e-9"
+numerical_aperture="1.42"
+refractive_index="1.45"
 
 

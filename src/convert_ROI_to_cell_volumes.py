@@ -2,9 +2,9 @@
 import numpy as np
 import det_sort as ds
 import sys
-from ijroi.ij_roi import Roi
-from ijroi.ijpython_encoder import encode_ij_roi,RGB_encoder
-from ijroi.ijpython_decoder import decode_ij_roi
+from ijroipytiff.ij_roi import Roi
+from ijroipytiff.ijpython_encoder import encode_ij_roi,RGB_encoder
+from ijroipytiff.ijpython_decoder import decode_ij_roi
 import tifffile
 import matplotlib.pylab as plt
 import glob

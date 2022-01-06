@@ -2,83 +2,118 @@
 ### It is parsed by quite a simple algorithm #'s are allowed, but please keep to double quotations and no spaces
 ### between variable names and equal signs.
 ### It can be parsed by run_bulk_exp.py tuned for darknet, Faster-RCNN and YOLOv2v3, ApoNet.
-### If not training, keep "train_on_dataset= " blank."" 
+### If not training, keep "train_on_dataset= "" i.e. blank" 
 
-out_file_log="U2OS_cells101.txt" 
- 
-start #neuroblastoma 180
+out_file_log="U2OS_cell_focus_test.txt"
+
+#start #neuroblastoma 180
 faster_rcnn_model_init=""
 darknet2_model_init="darknet19_448.conv.23"
 darknet3_model_init="darknet53.conv.74"
 retinanet_model_init=""
+depth_of_network="50"
 train_on_dataset="dataset0"
+focus_mode=True
 classes=1
 flip_on=True
 test_on_dataset="dataset0"
+psf_width_pixels="51"
+z_depth_meters="0.500e-6"
+focus_levels="10"
 number_of_repetitions=3
 
-start #Erythroblast dapi class
+#start #Erythroblast dapi class
 faster_rcnn_model_init=""
 darknet2_model_init="darknet19_448.conv.23"
 darknet3_model_init="darknet53.conv.74"
 retinanet_model_init=""
+depth_of_network="50"
 train_on_dataset="dataset8"
+focus_mode=True
 classes=1
 flip_on=True
 test_on_dataset="dataset8"
+psf_width_pixels="51"
+z_depth_meters="0.500e-6"
+focus_levels="10"
 number_of_repetitions=3
 
-start #C127 dapi class
+#start #C127 dapi class
 faster_rcnn_model_init=""
 darknet2_model_init="darknet19_448.conv.23"
 darknet3_model_init="darknet53.conv.74"
 retinanet_model_init=""
+depth_of_network="50"
 train_on_dataset="dataset10"
+focus_mode=True
 classes=1
 flip_on=True
 test_on_dataset="dataset10"
+psf_width_pixels="51"
+z_depth_meters="0.500e-6"
+focus_levels="10"
 number_of_repetitions=3
 
-start #Eukaryote dapi class
+#start #Eukaryote dapi class
 faster_rcnn_model_init=""
 darknet2_model_init="darknet19_448.conv.23"
 darknet3_model_init="darknet53.conv.74"
 retinanet_model_init=""
+depth_of_network="50"
 train_on_dataset="dataset11"
+focus_mode=True
 classes=1
 flip_on=True
 test_on_dataset="dataset11"
+psf_width_pixels="51"
+z_depth_meters="0.500e-6"
+focus_levels="10"
 number_of_repetitions=3
 
-start #Fibroblast nucleopore class
+#start #Fibroblast nucleopore class
 faster_rcnn_model_init=""
 darknet2_model_init="darknet19_448.conv.23"
 darknet3_model_init="darknet53.conv.74"
 retinanet_model_init=""
+depth_of_network="50"
 train_on_dataset="dataset12"
+focus_mode=True
 classes=1
 flip_on=True
 test_on_dataset="dataset12"
+psf_width_pixels="51"
+z_depth_meters="0.500e-6"
+focus_levels="10"
 number_of_repetitions=3
 
 start #Hek peroxisome class, full data:
 faster_rcnn_model_init=""
 darknet2_model_init="darknet19_448.conv.23"
 darknet3_model_init="darknet53.conv.74"
-retinanet_model_init=""
-train_on_dataset="dataset14"
+retinanet_model_init="../../models/pytorch/hek_peroxisome_all_class55/model_final.pt"
+depth_of_network="50"
+train_on_dataset=""
+focus_mode=True
 classes=1
 flip_on=True
 test_on_dataset="dataset14"
-number_of_repetitions=3
+psf_width_pixels="51"
+z_depth_meters="0.500e-6"
+focus_levels="10"
+number_of_repetitions=1
 
 start #U2OS_cells_rfp_pcna
 faster_rcnn_model_init=""
 darknet2_model_init="darknet19_448.conv.23"
 darknet3_model_init="darknet53.conv.74"
 retinanet_model_init=""
+depth_of_network="50"
 train_on_dataset="dataset33"
+focus_mode=True
 classes=1
 flip_on=True
 test_on_dataset="dataset33"
+psf_width_pixels="51"
+z_depth_meters="0.500e-6"
+focus_levels="10"
 number_of_repetitions=3
