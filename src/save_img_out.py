@@ -1,6 +1,6 @@
 #For this we need the libary: https://github.com/dwaithe/ijpython_roi
-from ijroi.ij_roi import Roi
-from ijroi.ijpython_encoder import encode_ij_roi, RGB_encoder
+from ijroipytiff.ij_roi import Roi
+from ijroipytiff.ijpython_encoder import encode_ij_roi, RGB_encoder
 import numpy as np
 import tifffile
 import os
@@ -13,24 +13,30 @@ def saveas_imagej_tiff(im_stk, stack_rois,d):
 	height = im_stk.shape[3]
 	
 	print('Saving img stack of dims: ',im_stk.shape)
+	features = ""
+	focus_arr = []
 	for regions,z in stack_rois:
+		focus = []
 		for reg in regions:
 							
-			r0 = np.clip(reg[0],0,width)
-			r1 = np.clip(reg[1],0,height)
-			r2 = np.clip(reg[2],0,width)
-			r3 = np.clip(reg[3],0,height)
+			r0 = np.clip(reg[0],0,width)#check that it is not negative
+			r1 = np.clip(reg[1],0,height)#check that it is not negative
+			r2 = reg[2]
+			r3 = reg[3]
+			focus.append(reg[6])
+			features += ','.join(str(e) for e in reg[7])+'\n'
 			roi_b = Roi(r0,r1,r2,r3, width,height,0)
-			roi_b.name = "Region-1-p-"+str(reg[4])
+			roi_b.name = "Region-1-c-"+str(reg[5])+"-p-"+str(np.round(reg[4],5))+"-f-"+str(np.round(reg[6],5))
 			roi_b.roiType = 1
 			if d.ch_to_save == 1:
-				roi_b.setPosition(z)
+				roi_b.setPosition(z+1)
 			else:
 				roi_b.setPositionH(1,z+1,-1) #channel, sliceZ, frame
 				
 			roi_b.strokeLineWidth = 1.0
 			roi_b.strokeColor = RGB_encoder(255,255,0,0)
 			lets_get_meta.append(encode_ij_roi(roi_b))
+		focus_arr.append(np.average(focus))
 
 
 	metadata = {'hyperstack': True } 
@@ -73,7 +79,7 @@ def saveas_imagej_tiff(im_stk, stack_rois,d):
 	info += "Computer name: "+str(d.computer_name)+".\n"
 	info += "Processor type: "+str(d.processor_type)+".\n"
 	info += "Detection algorithm: "+str(d.algorithm_name)+".\n"
-	info += "Detection repo hash: "+d.dkrepo+" (search github with this).\n"
+	info += "Detection repo hash: "+d.model_repo+" (search github with this).\n"
 	info += "Detection model configuration: "+str(d.config_path)+".\n"
 	info += "Detection model weights: "+str(d.weight_path)+".\n"
 	info += "Detection metadata: "+str(d.meta_path)+".\n"
@@ -92,8 +98,13 @@ def saveas_imagej_tiff(im_stk, stack_rois,d):
 	info +=  "(um)\n"
 	if d.best_focus_idx != None:
 		info += "best_focus_idx: "+str(d.best_focus_idx)+"\n" 
-		info += "best_focus_um: "+str(d.best_focus)+" um.\n" 
-	
+		info += "best_focus_um: "+str(d.best_focus)+" um.\n"
+	if focus_arr.__len__() == 1:
+		info += "optimum_focus_score: "+str(focus_arr[z])+"\n"
+	else:
+	    info += "optimum_focus_score: "+str(focus_arr[d.best_focus_idx])+"\n"
+	info +=  "Features:\n"
+	info += features
 	
 	resolution = (1./d.voxel_xy,1./d.voxel_xy) #Expects tuple, ratio pixel to physical unit (for unit see 'unit').
 	print('numoftimepts',d.num_of_tpts)
